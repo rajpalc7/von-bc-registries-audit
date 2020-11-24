@@ -1,0 +1,37 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+.DS_Store
+
+# Files created by the scripts from; https://github.com/BCDevOps/openshift-project-tools
+*_DeploymentConfig.json
+*_BuildConfig.json
+*.local.*
+__pycache__
+
+# Indy Agent - genesis transaction file(s)
+genesis
+
+# Visual Studio Code
+.vscode
+
+# Local config
+.env
+venv/
+
+# Ignore local Gradle files and folders
+.settings
+.gradle
+/build/
+bcreg-x
+*.csv
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
