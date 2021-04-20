@@ -27,9 +27,9 @@ if __name__ == "__main__":
 
     # read from orgbook database
     if USE_CSV:
-        orgbook_corp_types = get_orgbook_all_corps_csv()
+        (orgbook_corp_types, orgbook_corp_names) = get_orgbook_all_corps_csv()
     else:
-        orgbook_corp_types = get_orgbook_all_corps()
+        (orgbook_corp_types, orgbook_corp_names) = get_orgbook_all_corps()
 
     # corps that are still in the event processor queue waiting to be processed (won't be in orgbook yet)
     if USE_CSV:
@@ -39,9 +39,9 @@ if __name__ == "__main__":
 
     # check if all the BC Reg corps are in orgbook (with the same corp type)
     if USE_CSV:
-        bc_reg_corp_types = get_bc_reg_corps_csv()
+        (bc_reg_corp_types, bc_reg_corp_names) = get_bc_reg_corps_csv()
     else:
-        bc_reg_corp_types = get_bc_reg_corps()
+        (bc_reg_corp_types, bc_reg_corp_names) = get_bc_reg_corps()
 
     # do the orgbook/bc reg compare
-    compare_bc_reg_orgbook(bc_reg_corp_types, orgbook_corp_types, future_corps)
+    compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, orgbook_corp_types, orgbook_corp_names, future_corps)

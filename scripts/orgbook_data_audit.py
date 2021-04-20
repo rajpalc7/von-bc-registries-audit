@@ -11,14 +11,16 @@ import csv
 from config import CORP_TYPES_IN_SCOPE, corp_num_with_prefix, bare_corp_num
 
 
-def compare_bc_reg_orgbook(bc_reg_corp_types, orgbook_corp_types, future_corps):
+def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, orgbook_corp_types, orgbook_corp_names, future_corps):
     missing_in_orgbook = []
     missing_in_bcreg = []
     wrong_corp_type = []
+    wrong_corp_name = []
 
     # check if all the BC Reg corps are in orgbook (with the same corp type)
     for bc_reg_corp_num in bc_reg_corp_types:
         bc_reg_corp_type = bc_reg_corp_types[bc_reg_corp_num]
+        bc_reg_corp_name = bc_reg_corp_names[bc_reg_corp_num]
         if bare_corp_num(bc_reg_corp_num) in future_corps:
             #print("Future corp ignore:", row["corp_num"])
             pass
@@ -33,6 +35,12 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, orgbook_corp_types, future_corps):
             wrong_corp_type.append(bc_reg_corp_num)
             print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
             print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+        elif (orgbook_corp_names[bc_reg_corp_num] != bc_reg_corp_name):
+            # in orgbook but has the wrong corp name in orgbook
+            print("Corp Name mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_name+'",', ' OrgBook: "'+orgbook_corp_names[bc_reg_corp_num]+'"')
+            wrong_corp_name.append(bc_reg_corp_num)
+            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
+            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
 
     # now check if there are corps in orgbook that are *not* in BC Reg database
     for orgbook_corp in orgbook_corp_types:
@@ -41,6 +49,7 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, orgbook_corp_types, future_corps):
             print("OrgBook corp not in BC Reg:", orgbook_corp)
             print("./manage -p bc -e prod deleteTopic " + orgbook_corp)
 
-    print("Missing in OrgBook:", len(missing_in_orgbook), missing_in_orgbook)
-    print("Missing in BC Reg: ", len(missing_in_bcreg), missing_in_bcreg)
-    print("Wrong corp type:   ", len(wrong_corp_type), wrong_corp_type)
+    print("Missing in OrgBook: ", len(missing_in_orgbook), missing_in_orgbook)
+    print("Missing in BC Reg:  ", len(missing_in_bcreg), missing_in_bcreg)
+    print("Wrong corp type:    ", len(wrong_corp_type), wrong_corp_type)
+    print("Wrong corp name:    ", len(wrong_corp_name), wrong_corp_name)
