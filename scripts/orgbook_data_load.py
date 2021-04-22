@@ -29,7 +29,8 @@ def get_bc_reg_corps():
 
     # run this query against BC Reg database:
     sql1 = """
-    select corp.corp_num, corp.corp_typ_cd, corp_name.corp_nme, corp_name_as.corp_nme corp_nme_as
+    select corp.corp_num, corp.corp_typ_cd, corp.recognition_dts,
+        corp_name.corp_nme, corp_name_as.corp_nme corp_nme_as
     from bc_registries.corporation corp
     left join bc_registries.corp_name corp_name
         on corp_name.corp_num = corp.corp_num
@@ -43,12 +44,31 @@ def get_bc_reg_corps():
         select corp_num from bc_registries.corp_state where state_typ_cd = 'HWT');
     """
 
+    sql2 = """
+    select corp.corp_num, corp.corp_typ_cd, corp.recognition_dts,
+        jurisdiction.can_jur_typ_cd, jurisdiction.xpro_typ_cd, jurisdiction.othr_juris_desc,
+        corp_state.state_typ_cd, corp_op_state.op_state_typ_cd, corp_type.corp_class
+    from bc_registries.corporation corp
+    left join bc_registries.corp_type
+        on corp_type.corp_typ_cd = corp.corp_typ_cd
+    left join bc_registries.jurisdiction
+        on jurisdiction.corp_num = corp.corp_num
+        and jurisdiction.end_event_id is null
+    left join bc_registries.corp_state
+        on corp_state.corp_num = corp.corp_num
+        and corp_state.end_event_id is null
+    left join bc_registries.corp_op_state
+        on corp_op_state.state_typ_cd = corp_state.state_typ_cd
+    where corp.corp_num not in (
+        select corp_num from bc_registries.corp_state where state_typ_cd = 'HWT');
+    """
+
     bc_reg_corps = {}
     bc_reg_corp_types = {}
     bc_reg_corp_names = {}
     bc_reg_count = 0
     with open('export/bc_reg_corps.csv', mode='w') as corp_file:
-        fieldnames = ["corp_num", "corp_type", "corp_name"]
+        fieldnames = ["corp_num", "corp_type", "corp_name", "recognition_dts", "can_jur_typ_cd", "xpro_typ_cd", "othr_juris_desc", "state_typ_cd", "op_state_typ_cd", "corp_class"]
         corp_writer = csv.DictWriter(corp_file, fieldnames=fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         corp_writer.writeheader()
 
@@ -64,14 +84,45 @@ def get_bc_reg_corps():
                 bc_reg_corp = {
                     "corp_num": full_corp_num,
                     "corp_type": bc_reg_rec['corp_typ_cd'],
-                    "corp_name": corp_name
+                    "corp_name": corp_name,
+                    "recognition_dts": bc_reg_rec['recognition_dts'],
+                    "can_jur_typ_cd": "",
+                    "xpro_typ_cd": "",
+                    "othr_juris_desc": "",
+                    "state_typ_cd": "",
+                    "op_state_typ_cd": "",
+                    "corp_class": "",
                 }
                 bc_reg_corps[full_corp_num] = bc_reg_corp
                 bc_reg_corp_types[bc_reg_corp["corp_num"]] = bc_reg_corp["corp_type"]
                 bc_reg_corp_names[bc_reg_corp["corp_num"]] = bc_reg_corp["corp_name"]
-                corp_writer.writerow(bc_reg_corp)
 
-    return (bc_reg_corp_types, bc_reg_corp_names)
+        bc_reg_recs_2 = get_db_sql("bc_registries", sql2)
+        for bc_reg_rec in bc_reg_recs_2:
+            if bc_reg_rec['corp_typ_cd'] in CORP_TYPES_IN_SCOPE:
+                full_corp_num = corp_num_with_prefix(bc_reg_rec['corp_typ_cd'], bc_reg_rec['corp_num'])
+                if full_corp_num in bc_reg_corps:
+                    bc_reg_corp = bc_reg_corps[full_corp_num]
+                else:
+                    bc_reg_corp = {
+                        "corp_num": full_corp_num,
+                        "corp_type": bc_reg_rec['corp_typ_cd'],
+                        "corp_name": "",
+                        "recognition_dts": bc_reg_rec['recognition_dts'],
+                    }
+                bc_reg_corp["can_jur_typ_cd"] = bc_reg_rec['can_jur_typ_cd']
+                bc_reg_corp["xpro_typ_cd"] = bc_reg_rec['xpro_typ_cd']
+                bc_reg_corp["othr_juris_desc"] = bc_reg_rec['othr_juris_desc']
+                bc_reg_corp["state_typ_cd"] = bc_reg_rec['state_typ_cd']
+                bc_reg_corp["op_state_typ_cd"] = bc_reg_rec['op_state_typ_cd']
+                bc_reg_corp["corp_class"] = bc_reg_rec['corp_class']
+                bc_reg_corps[full_corp_num] = bc_reg_corp
+
+        for full_corp_num in bc_reg_corps:
+            bc_reg_corp = bc_reg_corps[full_corp_num]
+            corp_writer.writerow(bc_reg_corp)
+
+    return (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corps)
 
 
 def get_bc_reg_corps_csv():
@@ -80,13 +131,27 @@ def get_bc_reg_corps_csv():
     """
     bc_reg_corp_types = {}
     bc_reg_corp_names = {}
+    bc_reg_corp_infos = {}
     with open('export/bc_reg_corps.csv', mode='r') as corp_file:
         corp_reader = csv.DictReader(corp_file)
         for row in corp_reader:
             bc_reg_corp_types[row["corp_num"]] = row["corp_type"]
             bc_reg_corp_names[row["corp_num"]] = row["corp_name"]
 
-    return (bc_reg_corp_types, bc_reg_corp_names)
+            bc_reg_corp_infos[row["corp_num"]] = {
+                "corp_num": row["corp_num"],
+                "corp_type": row["corp_type"],
+                "corp_name": row["corp_name"],
+                "recognition_dts": row["recognition_dts"],
+                "can_jur_typ_cd": row["can_jur_typ_cd"],
+                "xpro_typ_cd": row["xpro_typ_cd"],
+                "othr_juris_desc": row["othr_juris_desc"],
+                "state_typ_cd": row["state_typ_cd"],
+                "op_state_typ_cd": row["op_state_typ_cd"],
+                "corp_class": row["corp_class"],
+            }
+
+    return (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos)
 
 
 def get_orgbook_all_corps():
@@ -104,15 +169,22 @@ def get_orgbook_all_corps():
     print("Get corp stats from OrgBook DB", datetime.datetime.now())
     orgbook_corp_types = {}
     orgbook_corp_names = {}
+    orgbook_corp_infos = {}
     with open('export/orgbook_search_corps.csv', mode='w') as corp_file:
-        fieldnames = ["corp_num", "corp_type", "corp_name"]
+        fieldnames = ["corp_num", "corp_type", "registration_date", "corp_name", "home_jurisdiction", "entity_status"]
         corp_writer = csv.DictWriter(corp_file, fieldnames=fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         corp_writer.writeheader()
 
         sql4 = """
-        select topic.source_id, attribute.value, name.text, name_as.text from topic 
+        select topic.source_id, attribute.value entity_type, attr_reg_dt.value registration_date,
+            name.text entity_name, name_as.text entity_name_assumed,
+            attr_juris.value home_jurisdiction, attr_status.value entity_status
+            from topic
         left join credential on credential.topic_id = topic.id and credential.latest = true and credential_type_id = 1
         left join attribute on attribute.credential_id = credential.id and attribute.type = 'entity_type'
+        left join attribute attr_reg_dt on attr_reg_dt.credential_id = credential.id and attr_reg_dt.type = 'registration_date'
+        left join attribute attr_juris on attr_juris.credential_id = credential.id and attr_juris.type = 'home_jurisdiction'
+        left join attribute attr_status on attr_status.credential_id = credential.id and attr_status.type = 'entity_status'
         left join name on name.credential_id = credential.id and name.type = 'entity_name'
         left join name name_as on name_as.credential_id = credential.id and name_as.type = 'entity_name_assumed';
         """
@@ -121,28 +193,38 @@ def get_orgbook_all_corps():
             cur.execute(sql4)
             for row in cur:
                 orgbook_corp_types[row[0]] = row[1]
-                corp_name = row[3] if (row[3] and 0 < len(row[3])) else row[2]
-                orgbook_corp_names[row[0]] = row[2]
-                write_corp = {"corp_num":row[0], "corp_type":row[1], "corp_name":corp_name}
+                corp_name = row[4] if (row[4] and 0 < len(row[4])) else row[3]
+                orgbook_corp_names[row[0]] = corp_name
+                write_corp = {
+                    "corp_num": row[0],
+                    "corp_type": row[1],
+                    "registration_date": row[2],
+                    "corp_name":corp_name,
+                    "home_jurisdiction": row[5],
+                    "entity_status": row[6],
+                }
                 corp_writer.writerow(write_corp)
+                orgbook_corp_infos[row[0]] = write_corp
             cur.close()
         except (Exception) as error:
             print(error)
             raise
 
-    return (orgbook_corp_types, orgbook_corp_names)
+    return (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos)
 
 
 def get_orgbook_all_corps_csv():
     orgbook_corp_types = {}
     orgbook_corp_names = {}
+    orgbook_corp_infos = {}
     with open('export/orgbook_search_corps.csv', mode='r') as corp_file:
         corp_reader = csv.DictReader(corp_file)
         for row in corp_reader:
             orgbook_corp_types[row["corp_num"]] = row["corp_type"]
             orgbook_corp_names[row["corp_num"]] = row["corp_name"]
+            orgbook_corp_infos[row["corp_num"]] = row
 
-    return (orgbook_corp_types, orgbook_corp_names)
+    return (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos)
 
 
 def get_event_proc_future_corps():
