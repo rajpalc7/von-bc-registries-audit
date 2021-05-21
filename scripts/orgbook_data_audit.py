@@ -80,12 +80,12 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
         elif not bc_reg_corp_num in orgbook_corp_types:
             # not in orgbook
             #print("Topic not found for:", row)
-            missing_in_orgbook.append(bc_reg_corp_num)
-            print("./manage -e prod queueOrganization " + bare_corp_num(bc_reg_corp_num))
+            #missing_in_orgbook.append(bc_reg_corp_num)
+            #print("./manage -e prod queueOrganization " + bare_corp_num(bc_reg_corp_num))
             pass
         elif (not orgbook_corp_types[bc_reg_corp_num]) or (orgbook_corp_types[bc_reg_corp_num] != bc_reg_corp_type):
             # in orgbook but has the wrong corp type in orgbook
-            #print("Corp Type mis-match for:", row, orgbook_corp_types[row["corp_num"]])
+            print("Corp Type mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_type+'",', ' OrgBook: "'+orgbook_corp_types[bc_reg_corp_num]+'"')
             wrong_corp_type.append(bc_reg_corp_num)
             print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
             print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
