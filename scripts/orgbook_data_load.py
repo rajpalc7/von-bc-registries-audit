@@ -29,7 +29,7 @@ def get_bc_reg_corps():
 
     # run this query against BC Reg database:
     sql1 = """
-    select corp.corp_num, corp.corp_typ_cd, corp.recognition_dts,
+    select corp.corp_num, corp.corp_typ_cd, corp.recognition_dts, corp.bn_9,
         corp_name.corp_nme, corp_name_as.corp_nme corp_nme_as
     from bc_registries.corporation corp
     left join bc_registries.corp_name corp_name
@@ -45,7 +45,7 @@ def get_bc_reg_corps():
     """
 
     sql2 = """
-    select corp.corp_num, corp.corp_typ_cd, corp.recognition_dts,
+    select corp.corp_num, corp.corp_typ_cd, corp.recognition_dts, corp.bn_9,
         jurisdiction.can_jur_typ_cd, jurisdiction.xpro_typ_cd, jurisdiction.othr_juris_desc,
         corp_state.state_typ_cd, corp_op_state.op_state_typ_cd, corp_type.corp_class
     from bc_registries.corporation corp
@@ -68,7 +68,7 @@ def get_bc_reg_corps():
     bc_reg_corp_names = {}
     bc_reg_count = 0
     with open('export/bc_reg_corps.csv', mode='w') as corp_file:
-        fieldnames = ["corp_num", "corp_type", "corp_name", "recognition_dts", "can_jur_typ_cd", "xpro_typ_cd", "othr_juris_desc", "state_typ_cd", "op_state_typ_cd", "corp_class"]
+        fieldnames = ["corp_num", "corp_type", "corp_name", "recognition_dts", "bn_9", "can_jur_typ_cd", "xpro_typ_cd", "othr_juris_desc", "state_typ_cd", "op_state_typ_cd", "corp_class"]
         corp_writer = csv.DictWriter(corp_file, fieldnames=fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         corp_writer.writeheader()
 
@@ -86,6 +86,7 @@ def get_bc_reg_corps():
                     "corp_type": bc_reg_rec['corp_typ_cd'],
                     "corp_name": corp_name,
                     "recognition_dts": bc_reg_rec['recognition_dts'],
+                    "bn_9": bc_reg_rec['bn_9'],
                     "can_jur_typ_cd": "",
                     "xpro_typ_cd": "",
                     "othr_juris_desc": "",
@@ -109,6 +110,7 @@ def get_bc_reg_corps():
                         "corp_type": bc_reg_rec['corp_typ_cd'],
                         "corp_name": "",
                         "recognition_dts": bc_reg_rec['recognition_dts'],
+                        "bn_9": bc_reg_rec['bn_9'],
                     }
                 bc_reg_corp["can_jur_typ_cd"] = bc_reg_rec['can_jur_typ_cd']
                 bc_reg_corp["xpro_typ_cd"] = bc_reg_rec['xpro_typ_cd']
@@ -143,6 +145,7 @@ def get_bc_reg_corps_csv():
                 "corp_type": row["corp_type"],
                 "corp_name": row["corp_name"],
                 "recognition_dts": row["recognition_dts"],
+                "bn_9": row["bn_9"],
                 "can_jur_typ_cd": row["can_jur_typ_cd"],
                 "xpro_typ_cd": row["xpro_typ_cd"],
                 "othr_juris_desc": row["othr_juris_desc"],
@@ -171,22 +174,46 @@ def get_orgbook_all_corps():
     orgbook_corp_names = {}
     orgbook_corp_infos = {}
     with open('export/orgbook_search_corps.csv', mode='w') as corp_file:
-        fieldnames = ["corp_num", "corp_type", "registration_date", "corp_name", "home_jurisdiction", "entity_status"]
+        fieldnames = ["corp_num", "corp_type", "registration_date", "corp_name", "home_jurisdiction", "entity_status", "bus_num"]
         corp_writer = csv.DictWriter(corp_file, fieldnames=fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         corp_writer.writeheader()
+
+        sql4_a = "select id from credential_type where description = 'registration.registries.ca'"
+
+        sql4_b = "select id from credential_type where description = 'business_number.registries.ca'"
+
+        corp_typ_id = None
+        bus_num_id = None
+        try:
+            cur = conn.cursor()
+            cur.execute(sql4_a)
+            for row in cur:
+                corp_typ_id = row[0]
+            cur.close()
+            cur = conn.cursor()
+            cur.execute(sql4_b)
+            for row in cur:
+                bus_num_id = row[0]
+            cur.close()
+        except (Exception) as error:
+            print(error)
+            raise
 
         sql4 = """
         select topic.source_id, attribute.value entity_type, attr_reg_dt.value registration_date,
             name.text entity_name, name_as.text entity_name_assumed,
-            attr_juris.value home_jurisdiction, attr_status.value entity_status
+            attr_juris.value home_jurisdiction, attr_status.value entity_status,
+            attr_bus_num.value bus_num
             from topic
-        left join credential on credential.topic_id = topic.id and credential.latest = true and credential_type_id = 1
-        left join attribute on attribute.credential_id = credential.id and attribute.type = 'entity_type'
-        left join attribute attr_reg_dt on attr_reg_dt.credential_id = credential.id and attr_reg_dt.type = 'registration_date'
-        left join attribute attr_juris on attr_juris.credential_id = credential.id and attr_juris.type = 'home_jurisdiction'
-        left join attribute attr_status on attr_status.credential_id = credential.id and attr_status.type = 'entity_status'
-        left join name on name.credential_id = credential.id and name.type = 'entity_name'
-        left join name name_as on name_as.credential_id = credential.id and name_as.type = 'entity_name_assumed';
+        left join credential as cred_corp_typ on cred_corp_typ.topic_id = topic.id and cred_corp_typ.latest = true and cred_corp_typ.credential_type_id = """ + str(corp_typ_id) + """
+        left join attribute on attribute.credential_id = cred_corp_typ.id and attribute.type = 'entity_type'
+        left join attribute attr_reg_dt on attr_reg_dt.credential_id = cred_corp_typ.id and attr_reg_dt.type = 'registration_date'
+        left join attribute attr_juris on attr_juris.credential_id = cred_corp_typ.id and attr_juris.type = 'home_jurisdiction'
+        left join attribute attr_status on attr_status.credential_id = cred_corp_typ.id and attr_status.type = 'entity_status'
+        left join name on name.credential_id = cred_corp_typ.id and name.type = 'entity_name'
+        left join name name_as on name_as.credential_id = cred_corp_typ.id and name_as.type = 'entity_name_assumed'
+        left join credential as cred_bus_num on cred_bus_num.topic_id = topic.id and cred_bus_num.latest = true and cred_bus_num.credential_type_id = """ + str(bus_num_id) + """
+        left join attribute as attr_bus_num on attr_bus_num.credential_id = cred_bus_num.id and attr_bus_num.type = 'business_number'
         """
         try:
             cur = conn.cursor()
@@ -202,6 +229,7 @@ def get_orgbook_all_corps():
                     "corp_name":corp_name,
                     "home_jurisdiction": row[5],
                     "entity_status": row[6],
+                    "bus_num": row[7],
                 }
                 corp_writer.writerow(write_corp)
                 orgbook_corp_infos[row[0]] = write_corp
