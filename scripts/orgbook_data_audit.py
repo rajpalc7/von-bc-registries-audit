@@ -66,6 +66,7 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
     wrong_corp_type = []
     wrong_corp_name = []
     wrong_corp_status = []
+    wrong_bus_num = []
     wrong_corp_reg_dt = []
     wrong_corp_juris = []
 
@@ -101,6 +102,12 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
             wrong_corp_status.append(bc_reg_corp_num)
             print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
             print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+        elif (orgbook_corp_infos[bc_reg_corp_num]["bus_num"].strip() != bc_reg_corp_info["bn_9"].strip()):
+            # wrong BN9 business number
+            print("Business Number mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_info["bn_9"]+'",', ' OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["bus_num"]+'"')
+            wrong_bus_num.append(bc_reg_corp_num)
+            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
+            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
         elif (not compare_dates(orgbook_corp_infos[bc_reg_corp_num]["registration_date"], bc_reg_corp_info["recognition_dts"])):
             # wrong registration date
             print("Corp Registration Date mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_info["recognition_dts"]+'",', ' OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["registration_date"]+'"')
@@ -127,5 +134,6 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
     print("Wrong corp type:         ", len(wrong_corp_type), wrong_corp_type)
     print("Wrong corp name:         ", len(wrong_corp_name), wrong_corp_name)
     print("Wrong corp status:       ", len(wrong_corp_status), wrong_corp_status)
+    print("Wrong business number:   ", len(wrong_bus_num), wrong_bus_num)
     print("Wrong corp registration: ", len(wrong_corp_reg_dt), wrong_corp_reg_dt)
     print("Wrong corp jurisdiction: ", len(wrong_corp_juris), wrong_corp_juris)
