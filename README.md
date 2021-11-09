@@ -20,6 +20,9 @@ Run the script as follows:
 ```bash
 BC_REG_DB_USER=<user> \
    BC_REG_DB_PASSWORD=<password> \
+   EVENT_PROC_DB_USER=<user> \
+   EVENT_PROC_DB_PASSWORD=<password> \
+   ... etc ... \
    USE_CSV=false \
    python ./detail_audit_report.py
 ```

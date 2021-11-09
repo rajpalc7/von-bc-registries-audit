@@ -10,6 +10,7 @@ import requests
 import csv
 
 from config import CORP_TYPES_IN_SCOPE, corp_num_with_prefix, bare_corp_num
+from rocketchat_hooks import log_error, log_warning, log_info
 
 
 MIN_START_DATE = datetime.datetime(datetime.MINYEAR+1, 1, 1)
@@ -71,6 +72,8 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
     wrong_corp_juris = []
 
     # check if all the BC Reg corps are in orgbook (with the same corp type)
+    error_msgs = ""
+    error_cmds = ""
     for bc_reg_corp_num in bc_reg_corp_types:
         bc_reg_corp_type = bc_reg_corp_types[bc_reg_corp_num]
         bc_reg_corp_name = bc_reg_corp_names[bc_reg_corp_num]
@@ -80,60 +83,79 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
             pass
         elif not bc_reg_corp_num in orgbook_corp_types:
             # not in orgbook
-            print("Topic not found for:", bc_reg_corp_num)
+            error_msgs += "Topic not found for: " + bc_reg_corp_num + "\n"
             missing_in_orgbook.append(bc_reg_corp_num)
-            print("./manage -e prod queueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -e prod queueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
             pass
         elif (not orgbook_corp_types[bc_reg_corp_num]) or (orgbook_corp_types[bc_reg_corp_num] != bc_reg_corp_type):
             # in orgbook but has the wrong corp type in orgbook
-            print("Corp Type mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_type+'",', ' OrgBook: "'+orgbook_corp_types[bc_reg_corp_num]+'"')
+            error_msgs += "Corp Type mis-match for: " + bc_reg_corp_num + '; BC Reg: "'+bc_reg_corp_type+'", OrgBook: "'+orgbook_corp_types[bc_reg_corp_num]+'"' + "\n"
             wrong_corp_type.append(bc_reg_corp_num)
-            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
-            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
+            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_names[bc_reg_corp_num] != bc_reg_corp_name):
             # in orgbook but has the wrong corp name in orgbook
-            print("Corp Name mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_name+'",', ' OrgBook: "'+orgbook_corp_names[bc_reg_corp_num]+'"')
+            error_msgs += "Corp Name mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_name+'", OrgBook: "'+orgbook_corp_names[bc_reg_corp_num]+'"' + "\n"
             wrong_corp_name.append(bc_reg_corp_num)
-            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
-            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
+            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_infos[bc_reg_corp_num]["entity_status"] != bc_reg_corp_info["op_state_typ_cd"]):
             # wrong entity status
-            print("Corp Status mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_info["op_state_typ_cd"]+'",', ' OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["entity_status"]+'"')
+            error_msgs += "Corp Status mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["op_state_typ_cd"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["entity_status"]+'"' + "\n"
             wrong_corp_status.append(bc_reg_corp_num)
-            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
-            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
+            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_infos[bc_reg_corp_num]["bus_num"].strip() != bc_reg_corp_info["bn_9"].strip()):
             # wrong BN9 business number
-            print("Business Number mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_info["bn_9"]+'",', ' OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["bus_num"]+'"')
+            error_msgs += "Business Number mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["bn_9"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["bus_num"]+'"' + "\n"
             wrong_bus_num.append(bc_reg_corp_num)
-            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
-            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
+            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (not compare_dates(orgbook_corp_infos[bc_reg_corp_num]["registration_date"], bc_reg_corp_info["recognition_dts"])):
             # wrong registration date
-            print("Corp Registration Date mis-match for:", bc_reg_corp_num, 'BC Reg: "'+bc_reg_corp_info["recognition_dts"]+'",', ' OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["registration_date"]+'"')
+            error_msgs += "Corp Registration Date mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["recognition_dts"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["registration_date"]+'"' + "\n"
             wrong_corp_reg_dt.append(bc_reg_corp_num)
-            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
-            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
+            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_infos[bc_reg_corp_num]["home_jurisdiction"] != get_corp_jurisdiction(bc_reg_corp_info["corp_type"], bc_reg_corp_info["corp_class"], bc_reg_corp_info["can_jur_typ_cd"], bc_reg_corp_info["othr_juris_desc"])):
             # wrong jurisdiction
             calc_juris = get_corp_jurisdiction(bc_reg_corp_info["corp_type"], bc_reg_corp_info["corp_class"], bc_reg_corp_info["can_jur_typ_cd"], bc_reg_corp_info["othr_juris_desc"])
-            print("Corp Jurisdiction mis-match for:", bc_reg_corp_num, 'BC Reg: "'+calc_juris+'",', ' OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["home_jurisdiction"]+'"')
+            error_msgs += "Corp Jurisdiction mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+calc_juris+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["home_jurisdiction"]+'"' + "\n"
             wrong_corp_juris.append(bc_reg_corp_num)
-            print("./manage -p bc -e prod deleteTopic " + bc_reg_corp_num)
-            print("./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num))
+            error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
+            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
 
     # now check if there are corps in orgbook that are *not* in BC Reg database
     for orgbook_corp in orgbook_corp_types:
         if not (orgbook_corp in bc_reg_corp_types):
             missing_in_bcreg.append(orgbook_corp)
-            print("OrgBook corp not in BC Reg:", orgbook_corp)
-            print("./manage -p bc -e prod deleteTopic " + orgbook_corp)
+            error_msgs += "OrgBook corp not in BC Reg: " + orgbook_corp + "\n"
+            error_cmds += "./manage -p bc -e prod deleteTopic " + orgbook_corp + "\n"
 
-    print("Missing in OrgBook:      ", len(missing_in_orgbook), missing_in_orgbook)
-    print("Missing in BC Reg:       ", len(missing_in_bcreg), missing_in_bcreg)
-    print("Wrong corp type:         ", len(wrong_corp_type), wrong_corp_type)
-    print("Wrong corp name:         ", len(wrong_corp_name), wrong_corp_name)
-    print("Wrong corp status:       ", len(wrong_corp_status), wrong_corp_status)
-    print("Wrong business number:   ", len(wrong_bus_num), wrong_bus_num)
-    print("Wrong corp registration: ", len(wrong_corp_reg_dt), wrong_corp_reg_dt)
-    print("Wrong corp jurisdiction: ", len(wrong_corp_juris), wrong_corp_juris)
+    corp_errors = (len(missing_in_orgbook) +
+                    len(missing_in_bcreg) +
+                    len(wrong_corp_type) +
+                    len(wrong_corp_name) +
+                    len(wrong_corp_status) +
+                    len(wrong_bus_num) +
+                    len(wrong_corp_reg_dt) +
+                    len(wrong_corp_juris))
+
+    if 0 < corp_errors:
+        log_error(error_msgs)
+        log_error(error_cmds)
+
+    error_summary = ""
+    error_summary += "Missing in OrgBook:      " + str(len(missing_in_orgbook)) + " " + str(missing_in_orgbook) + "\n"
+    error_summary += "Missing in BC Reg:       " + str(len(missing_in_bcreg)) + " " + str(missing_in_bcreg) + "\n"
+    error_summary += "Wrong corp type:         " + str(len(wrong_corp_type)) + " " + str(wrong_corp_type) + "\n"
+    error_summary += "Wrong corp name:         " + str(len(wrong_corp_name)) + " " + str(wrong_corp_name) + "\n"
+    error_summary += "Wrong corp status:       " + str(len(wrong_corp_status)) + " " + str(wrong_corp_status) + "\n"
+    error_summary += "Wrong business number:   " + str(len(wrong_bus_num)) + " " + str(wrong_bus_num) + "\n"
+    error_summary += "Wrong corp registration: " + str(len(wrong_corp_reg_dt)) + " " + str(wrong_corp_reg_dt) + "\n"
+    error_summary += "Wrong corp jurisdiction: " + str(len(wrong_corp_juris)) + " " + str(wrong_corp_juris) + "\n"
+
+    if 0 < corp_errors:
+        log_error(error_summary)
+    else:
+        log_info(error_summary)
