@@ -25,8 +25,8 @@ webhook_url = environ.get('WEBHOOK_URL', '')
 
 
 def get_webhook_payload(level, message):
-    project_name = environ.get('PROJECT_NAME', "von-bc-registries-agent")
-    friendly_project_name = environ.get('FRIENDLY_PROJECT_NAME', "BC Registries")
+    project_name = environ.get('PROJECT_NAME', "von-bc-registries-audit")
+    friendly_project_name = environ.get('FRIENDLY_PROJECT_NAME', "BC Registries Audit")
     payload = {
         "friendlyProjectName": friendly_project_name,
         "projectName": project_name,
@@ -57,14 +57,14 @@ def post_msg_to_webhook(level, message):
             payload = get_webhook_payload(level, message)
             try:
                 (status, text) = synchronous_post_url(webhook_url, payload)
-                print(">>> Posted webhook level", level, "with message", message)
+                print(">>> Posted webhook level", level, "with message:\n", message)
                 print(">>> Returned", status, text)
             except Exception as e:
                 print(">>> NOT posted webhook, error:", str(e))
         else:
-            print(">>> NOT Posted webhook level", level, "(", log_level, "), message", message)
+            print(">>> NOT Posted webhook level", level, "(", log_level, "), message:\n", message)
     else:
-        print(">>> NOT Posted webhook level", level, "message", message, "no webhook_url")
+        print(">>> NOT Posted webhook level", level, "message:\n", message, "\n(no webhook_url)\n")
 
 
 def log_info(message):
