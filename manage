@@ -1,0 +1,347 @@
+#!/bin/bash
+export MSYS_NO_PATHCONV=1
+export DOCKERHOST=${APPLICATION_URL-$(docker run --rm --net=host eclipse/che-ip)}
+SCRIPT_HOME="$(cd "$(dirname "$0")" && pwd)"
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-bc-reg-audit}"
+
+export APP_NAME="BC Reg Audit Scripts"
+set -e
+
+# =================================================================================================================
+# Usage:
+# -----------------------------------------------------------------------------------------------------------------
+usage() {
+  cat <<-EOF
+
+Usage:
+  $0 [options] [command] [args]
+
+Commands:
+  up|start [service]      - Spin up the api.
+  down|stop [service]     - Tear down the api.
+  restart [service]       - Restart the api.
+  logs <service>          - Stream the logs from a given container.
+  shell <service>         - Open a shell on a given container.
+  clean                   - Cleans up all environment resources.
+                            Deletes all containers images and prunes any dangling images.
+  build [service]         - Use for troubleshooting builds when making image configuration changes.
+                            Builds container images based on the docker-compose configuration.
+
+Options:
+  -h                      - Print this help documentation.
+EOF
+  exit 1
+}
+# -----------------------------------------------------------------------------------------------------------------
+# Functions:
+# -----------------------------------------------------------------------------------------------------------------
+function toLower() {
+  (
+    echo $(echo ${@} | tr '[:upper:]' '[:lower:]')
+  )
+}
+
+function echoBlue (){
+  (
+    _msg=${1}
+    _blue='\e[34m'
+    _nc='\e[0m' # No Color
+    echo -e "${_blue}${_msg}${_nc}" >&2
+  )
+}
+
+function echoGreen (){
+  (
+    _msg=${1}
+    _blue='\e[32m'
+    _nc='\e[0m' # No Color
+    echo -e "${_blue}${_msg}${_nc}" >&2
+  )
+}
+
+function echoYellow (){
+  (
+  _msg=${1}
+  _yellow='\e[33m'
+  _nc='\e[0m' # No Color
+  echo -e "${_yellow}${_msg}${_nc}" >&2
+  )
+}
+
+function echoError (){
+  (
+    _msg=${1}
+    _red='\e[31m'
+    _nc='\e[0m' # No Color
+    echo -e "${_red}${_msg}${_nc}" >&2
+  )
+}
+
+function isInstalled() {
+  (
+    if [ -x "$(command -v ${@})" ]; then
+      return 0
+    else
+      return 1
+    fi
+  )
+}
+
+function logs() {
+  (
+    if [ ! -z "${@}" ] && isService ${@}; then
+      echoBlue "Following container logs for ${@} ..."
+      ${DOCKER_COMPOSE_EXE} logs -f ${@}
+    fi
+  )
+}
+
+function openShell() {
+  (
+    if [ ! -z "${@}" ] && isService ${@}; then
+      echoBlue "Connecting remote shell to ${@} (type 'exit' to exit) ..."
+      ${DOCKER_COMPOSE_EXE} exec ${@} /bin/bash
+    fi
+  )
+}
+
+function readEnvFile(){
+  (
+    envFile=${1}
+    if [ -f ${envFile} ]; then
+      # Remove blank lines ...
+      filters="/^[[:blank:]]*$/d;"
+      # Remove full line comments ...
+      filters+="/^[[:blank:]]*#/d;"
+      # Remove any comments from the end of a line ...
+      filters+="s/#.*//;"
+      # Remove leading whitespace ...
+      filters+="s/^ *//;"
+      # Remove trailing whitespace ...
+      filters+="s/ *$//;"
+      _value=$(${SED_EXE} "${filters}" ${envFile})
+    fi
+    echo "${_value}"
+  )
+}
+
+function loadEnvVariables(){
+  for envTag in ${@}; do
+    for item in $(readEnvFile "./env/.env-${envTag}"); do
+      export "${item}"
+    done
+  done
+
+  if [ ! -f ${APP_ENV} ]; then
+    echo "# Put your local env vars here:" > ${APP_ENV}
+  fi
+}
+
+function getServices(){
+  (
+    ymlFile=${1}
+    unset services
+    if [ -f ${ymlFile} ]; then
+      services="$(${YQ_EXE} eval '.services | keys | .[]' ${ymlFile})"
+    fi
+    echo "${services}"
+  )
+}
+
+function getImages(){
+  (
+    ymlFile=${1}
+    unset images
+    if [ -f ${ymlFile} ]; then
+      images="$(${YQ_EXE} eval '.services[].image' ${ymlFile})"
+    fi
+
+    if [ -z "${images}" ] || [[ ${images} == *"null"* ]]; then
+      unset images
+      services=$(getServices ${ymlFile})
+      for service in ${services}; do
+        images+="${images:+" "}${COMPOSE_PROJECT_NAME}_${service}"
+      done
+    fi
+    echo "${images}"
+  )
+}
+
+function contains(){
+  (
+    local _item
+    _find=${1}
+    shift
+    for _item in ${@}; do [[ "${_item}" == "${_find}" ]] && return 0; done
+    return 1
+  )
+}
+
+function isService(){
+  (
+    serviceName=${1}
+    if contains "${serviceName}" "${_services[@]}"; then
+      return 0
+    else
+      echoYellow "No such service: ${serviceName}"
+      echoBlue "Available Services:"
+      for service in ${_services}; do
+        echoBlue " - ${service}"
+      done
+      return 1
+    fi
+  )
+}
+
+function build(){
+  (
+    echoGreen "\nBuilding ${@} ...\n"
+    ${DOCKER_COMPOSE_EXE} up --build --no-start ${@}
+  )
+}
+
+function up(){
+  (
+    echoGreen "\nStarting up the ${APP_NAME} ...\n"
+    ${DOCKER_COMPOSE_EXE} up -d ${@}
+  )
+}
+
+function down(){
+  (
+  echoGreen "\nStopping the ${APP_NAME} ...\n"
+  ${DOCKER_COMPOSE_EXE} down ${@}
+  )
+}
+
+function restart(){
+  (
+    echoGreen "\nRestarting the ${APP_NAME} ...\n"
+    down ${@}
+    up ${@}
+  )
+}
+
+function clean(){
+  (
+    down
+    echoGreen "\nRemoving project images ...\n"
+    ${DOCKER_EXE} image remove --force ${_images} 2>/dev/null
+    ${DOCKER_EXE} image prune --force > /dev/null 2>&1
+  )
+}
+
+# -----------------------------------------------------------------------------------------------------------------
+# Check for dependancies
+# -----------------------------------------------------------------------------------------------------------------
+DOCKER_EXE="docker"
+if ! isInstalled ${DOCKER_EXE}; then
+  echoYellow "${DOCKER_EXE} is not installed."
+  exit 1
+fi
+
+DOCKER_COMPOSE_EXE="docker-compose"
+if ! isInstalled ${DOCKER_COMPOSE_EXE}; then
+  echoYellow "${DOCKER_COMPOSE_EXE} is not installed."
+  exit 1
+fi
+
+# Dynamically detect the version of docker compose and adjust the '--log-level' syntax appropriately.
+# Default to using the existing syntax
+DOCKER_COMPOSE_EXE="docker-compose --log-level ERROR"
+dockerComposeVersion=$(docker-compose version --short | sed 's~v~~;s~-.*~~')
+dockerComposeVersion=${dockerComposeVersion%.*}
+if [[ $(awk "BEGIN {print (${dockerComposeVersion} >= 2.0) ? \"true\" : \"false\" }") == "true" ]]; then
+  # Use the new syntax when version 2.0.0 or greater is detected.
+  DOCKER_COMPOSE_EXE="docker --log-level error compose"
+fi
+
+SED_EXE=sed
+if ! isInstalled ${SED_EXE}; then
+  echoYellow "The ${SED_EXE} executable is required and was not found on your path."
+
+  cat <<-EOF
+  The recommended approach to installing the required package(s) is to use either [Homebrew](https://brew.sh/) (MAC)
+  or [Chocolatey](https://chocolatey.org/) (Windows).  For more information visit https://mikefarah.github.io/yq/
+
+  Windows:
+    - chocolatey install sed
+  MAC:
+    - brew install gnu-sed
+EOF
+  exit 1
+fi
+
+YQ_EXE=yq
+if ! isInstalled ${YQ_EXE}; then
+  echoYellow "The ${YQ_EXE} executable is required and was not found on your path."
+
+  cat <<-EOF
+  The recommended approach to installing the required package(s) is to use either [Homebrew](https://brew.sh/) (MAC)
+  or [Chocolatey](https://chocolatey.org/) (Windows).  For more information visit https://mikefarah.github.io/yq/
+
+  Windows:
+    - chocolatey install ${YQ_EXE}
+  MAC:
+    - brew install ${YQ_EXE}
+EOF
+  exit 1
+fi
+# -----------------------------------------------------------------------------------------------------------------
+# Initialization:
+# -----------------------------------------------------------------------------------------------------------------
+_envTags="default"
+while getopts ":h" FLAG; do
+  case $FLAG in
+    h ) usage ;;
+    \? ) #unrecognized option - show help
+      echoError "\nInvalid script option: -${OPTARG}"
+      usage
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+# Get the list of services ...
+_services=$(getServices "./docker-compose.yaml")
+_images=$(getImages "./docker-compose.yaml")
+# =================================================================================================================
+
+# =================================================================================================================
+# Main Script:
+# -----------------------------------------------------------------------------------------------------------------
+pushd ${SCRIPT_HOME} >/dev/null
+COMMAND=$(toLower ${1})
+shift || COMMAND=usage
+
+loadEnvVariables "${_envTags}"
+
+case "${COMMAND}" in
+  start|up)
+    up ${@}
+    ;;
+  stop|down)
+    down ${@}
+    ;;
+  restart)
+    restart ${@}
+    ;;
+  logs)
+    logs ${@}
+    ;;
+  shell)
+    openShell ${@}
+    ;;
+  clean)
+    clean ${@}
+    ;;
+  build)
+    build ${@}
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+popd >/dev/null
+# -----------------------------------------------------------------------------------------------------------------
