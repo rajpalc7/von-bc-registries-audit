@@ -19,15 +19,15 @@ COPY ./docker/run.sh .
 COPY ./docker/audit.conf .
 COPY ./scripts ./scripts
 RUN cd $HOME/scripts && pip install -r requirements.txt
-RUN mkdir -p $HOME/scripts/export
 
 USER root
 # ========================================================================================================
 # Perform operations that require root privilages here ...
 # --------------------------------------------------------------------------------------------------------
+RUN mkdir -p $HOME/scripts/export
 RUN echo $TZ > /etc/timezone
 RUN chmod +x /usr/bin/go-crond
 RUN chmod +x ./run.sh
-RUN chown default:root $HOME/scripts/export
+RUN chown default:root $HOME/scripts/export && chmod g+w $HOME/scripts/export
 # ========================================================================================================
 USER 1001

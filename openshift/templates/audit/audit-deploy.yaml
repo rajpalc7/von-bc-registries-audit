@@ -1,0 +1,452 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: ${NAME}${SUFFIX}-deployment-template
+objects:
+
+  - kind: Secret
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    stringData:
+      webhook-url: ${WEBHOOK_URL}
+
+      ${BC_REG_DB_HOST_KEY_NAME}: ${BC_REG_DB_HOST}
+      ${BC_REG_DB_PORT_KEY_NAME}: ${BC_REG_DB_PORT}
+      ${BC_REG_DB_DATABASE_KEY_NAME}: ${BC_REG_DB_DATABASE}
+      ${BC_REG_DB_USER_KEY_NAME}: ${BC_REG_DB_USER}
+      ${BC_REG_DB_PASSWORD_KEY_NAME}: ${BC_REG_DB_PASSWORD}
+
+      ${EVENT_PROC_DB_HOST_KEY_NAME}: ${EVENT_PROC_DB_HOST}
+      ${EVENT_PROC_DB_PORT_KEY_NAME}: ${EVENT_PROC_DB_PORT}
+      ${EVENT_PROC_DB_DATABASE_KEY_NAME}: ${EVENT_PROC_DB_DATABASE}
+      ${EVENT_PROC_DB_USER_KEY_NAME}: ${EVENT_PROC_DB_USER}
+      ${EVENT_PROC_DB_PASSWORD_KEY_NAME}: ${EVENT_PROC_DB_PASSWORD}
+
+      ${ORGBOOK_DB_HOST_KEY_NAME}: ${ORGBOOK_DB_HOST}
+      ${ORGBOOK_DB_PORT_KEY_NAME}: ${ORGBOOK_DB_PORT}
+      ${ORGBOOK_DB_DATABASE_KEY_NAME}: ${ORGBOOK_DB_DATABASE}
+      ${ORGBOOK_DB_USER_KEY_NAME}: ${ORGBOOK_DB_USER}
+      ${ORGBOOK_DB_PASSWORD_KEY_NAME}: ${ORGBOOK_DB_PASSWORD}
+    type: Opaque
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: ${NAME}${SUFFIX}
+      labels:
+        name: ${NAME}${SUFFIX}
+        app: ${APP_NAME}${SUFFIX}
+        app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+        app-group: ${APP_GROUP}
+        role: ${ROLE}
+        env: ${TAG_NAME}
+    spec:
+      strategy:
+        type: Recreate
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              namespace: ${IMAGE_NAMESPACE}
+              name: ${SOURCE_IMAGE_NAME}:${TAG_NAME}
+      replicas: 1
+      selector:
+        name: ${NAME}${SUFFIX}
+      template:
+        metadata:
+          name: ${NAME}${SUFFIX}
+          labels:
+            name: ${NAME}${SUFFIX}
+            app: ${APP_NAME}${SUFFIX}
+            app.kubernetes.io/part-of: ${APP_NAME}${SUFFIX}
+            app-group: ${APP_GROUP}
+            role: ${ROLE}
+            env: ${TAG_NAME}
+        spec:
+          volumes:
+            - name: ${NAME}${SUFFIX}-config-volume
+              configMap:
+                name: ${CONFIG_MAP_NAME}${SUFFIX}
+                items:
+                  - key: ${CONFIG_FILE_NAME}
+                    path: ${CONFIG_FILE_NAME}
+          containers:
+            - name: ${NAME}${SUFFIX}
+              command:
+                - /bin/bash
+                - -c
+                - "./run.sh"
+              image: ""
+              ports: []
+              env:
+
+                - name: USE_CSV
+                  value: ${USE_CSV}
+
+                - name: BC_REG_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${BC_REG_DB_HOST_KEY_NAME}
+                - name: BC_REG_DB_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${BC_REG_DB_PORT_KEY_NAME}
+                - name: BC_REG_DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${BC_REG_DB_DATABASE_KEY_NAME}
+                - name: BC_REG_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${BC_REG_DB_USER_KEY_NAME}
+                - name: BC_REG_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${BC_REG_DB_PASSWORD_KEY_NAME}
+
+                - name: EVENT_PROC_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${EVENT_PROC_DB_HOST_KEY_NAME}
+                - name: EVENT_PROC_DB_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${EVENT_PROC_DB_PORT_KEY_NAME}
+                - name: EVENT_PROC_DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${EVENT_PROC_DB_DATABASE_KEY_NAME}
+                - name: EVENT_PROC_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${EVENT_PROC_DB_USER_KEY_NAME}
+                - name: EVENT_PROC_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${EVENT_PROC_DB_PASSWORD_KEY_NAME}
+
+                - name: ORGBOOK_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_DB_HOST_KEY_NAME}
+                - name: ORGBOOK_DB_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_DB_PORT_KEY_NAME}
+                - name: ORGBOOK_DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_DB_DATABASE_KEY_NAME}
+                - name: ORGBOOK_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_DB_USER_KEY_NAME}
+                - name: ORGBOOK_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_DB_PASSWORD_KEY_NAME}
+
+                - name: WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: webhook-url
+                - name: ENVIRONMENT_FRIENDLY_NAME
+                  value: ${ENVIRONMENT_FRIENDLY_NAME}
+                - name: ENVIRONMENT_NAME
+                  value: ${ENVIRONMENT_NAME}
+                - name: DATABASE_SERVER_TIMEOUT
+                  value: ${DATABASE_SERVER_TIMEOUT}
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+              volumeMounts:
+                - name: ${NAME}${SUFFIX}-config-volume
+                  mountPath: ${CONFIG_MOUNT_PATH}${CONFIG_FILE_NAME}
+                  subPath: ${CONFIG_FILE_NAME}
+parameters:
+  - name: NAME
+    displayName: Name
+    description: The name assigned to all of the resources defined in this template.
+    required: true
+    value: audit
+  - name: ROLE
+    displayName: Role
+    description: Role
+    required: true
+    value: audit
+  - name: SUFFIX
+    displayName: Suffix
+    description: A name suffix used for all objects
+    required: false
+    value: 
+  - name: APP_NAME
+    displayName: App Name
+    description: Used to group components together in the OpenShift console.
+    required: true
+    value: Audit
+  - name: APP_GROUP
+    displayName: App Group
+    description: The name assigned to all of the deployments in this project.
+    required: true
+    value: Audit
+  - name: SOURCE_IMAGE_NAME
+    displayName: Source Image Name
+    description: The name of the image to use for this resource.
+    required: true
+    value: audit
+  - name: IMAGE_NAMESPACE
+    displayName: Image Namespace
+    description: The namespace of the OpenShift project containing the imagestream for the application.
+    required: true
+    value: ca7f8f-tools
+  - name: TAG_NAME
+    displayName: Environment TAG name
+    description: The TAG name for this environment, e.g., dev, test, prod
+    required: true
+    value: dev
+
+  - name: USE_CSV
+    displayName: USE_CSV
+    description: USE_CSV
+    required: true
+    value: "false"
+
+  - name: BC_REG_DB_HOST_KEY_NAME
+    displayName: BC_REG_DB_HOST_KEY_NAME
+    description: BC_REG_DB_HOST_KEY_NAME
+    required: true
+    value: bc-reg-db-host
+  - name: BC_REG_DB_PORT_KEY_NAME
+    displayName: BC_REG_DB_PORT_KEY_NAME
+    description: BC_REG_DB_PORT_KEY_NAME
+    required: true
+    value: bc-reg-db-port
+  - name: BC_REG_DB_DATABASE_KEY_NAME
+    displayName: BC_REG_DB_DATABASE_KEY_NAME
+    description: BC_REG_DB_DATABASE_KEY_NAME
+    required: true
+    value: bc-reg-db-name
+  - name: BC_REG_DB_USER_KEY_NAME
+    displayName: BC_REG_DB_USER_KEY_NAME
+    description: BC_REG_DB_USER_KEY_NAME
+    required: true
+    value: bc-reg-db-user
+  - name: BC_REG_DB_PASSWORD_KEY_NAME
+    displayName: BC_REG_DB_PASSWORD_KEY_NAME
+    description: BC_REG_DB_PASSWORD_KEY_NAME
+    required: true
+    value: bc-reg-db-password
+
+  - name: EVENT_PROC_DB_HOST_KEY_NAME
+    displayName: EVENT_PROC_DB_HOST_KEY_NAME
+    description: EVENT_PROC_DB_HOST_KEY_NAME
+    required: true
+    value: event-proc-db-host
+  - name: EVENT_PROC_DB_PORT_KEY_NAME
+    displayName: EVENT_PROC_DB_PORT_KEY_NAME
+    description: EVENT_PROC_DB_PORT_KEY_NAME
+    required: true
+    value: event-proc-db-port
+  - name: EVENT_PROC_DB_DATABASE_KEY_NAME
+    displayName: EVENT_PROC_DB_DATABASE_KEY_NAME
+    description: EVENT_PROC_DB_DATABASE_KEY_NAME
+    required: true
+    value: event-proc-db-name
+  - name: EVENT_PROC_DB_USER_KEY_NAME
+    displayName: EVENT_PROC_DB_USER_KEY_NAME
+    description: EVENT_PROC_DB_USER_KEY_NAME
+    required: true
+    value: event-proc-db-user
+  - name: EVENT_PROC_DB_PASSWORD_KEY_NAME
+    displayName: EVENT_PROC_DB_PASSWORD_KEY_NAME
+    description: EVENT_PROC_DB_PASSWORD_KEY_NAME
+    required: true
+    value: event-proc-db-password
+
+  - name: ORGBOOK_DB_HOST_KEY_NAME
+    displayName: ORGBOOK_DB_HOST_KEY_NAME
+    description: ORGBOOK_DB_HOST_KEY_NAME
+    required: true
+    value: orgbook-db-host
+  - name: ORGBOOK_DB_PORT_KEY_NAME
+    displayName: ORGBOOK_DB_PORT_KEY_NAME
+    description: ORGBOOK_DB_PORT_KEY_NAME
+    required: true
+    value: orgbook-db-port
+  - name: ORGBOOK_DB_DATABASE_KEY_NAME
+    displayName: ORGBOOK_DB_DATABASE_KEY_NAME
+    description: ORGBOOK_DB_DATABASE_KEY_NAME
+    required: true
+    value: orgbook-db-name
+  - name: ORGBOOK_DB_USER_KEY_NAME
+    displayName: ORGBOOK_DB_USER_KEY_NAME
+    description: ORGBOOK_DB_USER_KEY_NAME
+    required: true
+    value: orgbook-db-user
+  - name: ORGBOOK_DB_PASSWORD_KEY_NAME
+    displayName: ORGBOOK_DB_PASSWORD_KEY_NAME
+    description: ORGBOOK_DB_PASSWORD_KEY_NAME
+    required: true
+    value: orgbook-db-password
+
+  - name: BC_REG_DB_HOST
+    displayName: BC_REG_DB_HOST
+    description: BC_REG_DB_HOST
+    required: true
+    value: 
+  - name: BC_REG_DB_PORT
+    displayName: BC_REG_DB_PORT
+    description: BC_REG_DB_PORT
+    required: true
+    value: "5432"
+  - name: BC_REG_DB_DATABASE
+    displayName: BC_REG_DB_DATABASE
+    description: BC_REG_DB_DATABASE
+    required: true
+    value: BC_REGISTRIES
+  - name: BC_REG_DB_USER
+    displayName: BC_REG_DB_USER
+    description: BC_REG_DB_USER
+    required: true
+    value: 
+  - name: BC_REG_DB_PASSWORD
+    displayName: BC_REG_DB_PASSWORD
+    description: BC_REG_DB_PASSWORD
+    required: true
+    value: 
+
+  - name: EVENT_PROC_DB_HOST
+    displayName: EVENT_PROC_DB_HOST
+    description: EVENT_PROC_DB_HOST
+    required: true
+    value: 
+  - name: EVENT_PROC_DB_PORT
+    displayName: EVENT_PROC_DB_PORT
+    description: EVENT_PROC_DB_PORT
+    required: true
+    value: "5432"
+  - name: EVENT_PROC_DB_DATABASE
+    displayName: EVENT_PROC_DB_DATABASE
+    description: EVENT_PROC_DB_DATABASE
+    required: true
+    value: bc_reg_db
+  - name: EVENT_PROC_DB_USER
+    displayName: EVENT_PROC_DB_USER
+    description: EVENT_PROC_DB_USER
+    required: true
+    value: 
+  - name: EVENT_PROC_DB_PASSWORD
+    displayName: EVENT_PROC_DB_PASSWORD
+    description: EVENT_PROC_DB_PASSWORD
+    required: true
+    value: 
+
+  - name: ORGBOOK_DB_HOST
+    displayName: ORGBOOK_DB_HOST
+    description: ORGBOOK_DB_HOST
+    required: true
+    value: 
+  - name: ORGBOOK_DB_PORT
+    displayName: ORGBOOK_DB_PORT
+    description: ORGBOOK_DB_PORT
+    required: true
+    value: "5432"
+  - name: ORGBOOK_DB_DATABASE
+    displayName: ORGBOOK_DB_DATABASE
+    description: ORGBOOK_DB_DATABASE
+    required: true
+    value: aries-vcr
+  - name: ORGBOOK_DB_USER
+    displayName: ORGBOOK_DB_USER
+    description: ORGBOOK_DB_USER
+    required: true
+    value: 
+  - name: ORGBOOK_DB_PASSWORD
+    displayName: ORGBOOK_DB_PASSWORD
+    description: ORGBOOK_DB_PASSWORD
+    required: true
+    value: 
+
+  - name: WEBHOOK_URL
+    displayName: Webhook URL
+    description: The URL of the webhook to use for notifications.  If not specified, the webhook integration feature is disabled.
+    required: false
+    value: ""
+  - name: ENVIRONMENT_FRIENDLY_NAME
+    displayName: Friendly Environment Name
+    description: The human readable name of the environment.  This variable is used by the webhook integration to identify the environment in which the backup notifications originate.
+    required: false
+    value: ""
+  - name: ENVIRONMENT_NAME
+    displayName: Environment Name (Environment Id)
+    description: The name or Id of the environment.  This variable is used by the webhook integration to identify the environment in which the backup notifications originate.
+    required: false
+    value: ""
+  - name: CONFIG_FILE_NAME
+    displayName: Config File Name
+    description: The name of the configuration file.
+    required: true
+    value: audit.conf
+  - name: CONFIG_MAP_NAME
+    displayName: Config Map Name
+    description: The name of the configuration map.
+    required: true
+    value: audit-conf
+  - name: CONFIG_MOUNT_PATH
+    displayName: Config Mount Path
+    description: The path to use to mount the config file.
+    required: true
+    value: /opt/app-root/src/
+  - name: CPU_REQUEST
+    displayName: Resources CPU Request
+    description: The resources CPU request (in cores) for this build.
+    required: true
+    value: "0"
+  - name: CPU_LIMIT
+    displayName: Resources CPU Limit
+    description: The resources CPU limit (in cores) for this build.
+    required: true
+    value: "0"
+  - name: MEMORY_REQUEST
+    displayName: Resources Memory Request
+    description: The resources Memory request (in Mi, Gi, etc) for this build.
+    required: true
+    value: 0Mi
+  - name: MEMORY_LIMIT
+    displayName: Resources Memory Limit
+    description: The resources Memory limit (in Mi, Gi, etc) for this build.
+    required: true
+    value: 0Mi
