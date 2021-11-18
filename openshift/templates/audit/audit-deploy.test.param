@@ -1,0 +1,54 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: .
+# Template File: ../openshift/templates/audit/audit-deploy.yaml
+#=========================================================
+# NAME=audit
+# ROLE=audit
+# SUFFIX=
+# APP_NAME=Audit
+# APP_GROUP=Audit
+# SOURCE_IMAGE_NAME=audit
+# IMAGE_NAMESPACE=ca7f8f-tools
+TAG_NAME=test
+# USE_CSV=false
+# BC_REG_DB_HOST_KEY_NAME=bc-reg-db-host
+# BC_REG_DB_PORT_KEY_NAME=bc-reg-db-port
+# BC_REG_DB_DATABASE_KEY_NAME=bc-reg-db-name
+# BC_REG_DB_USER_KEY_NAME=bc-reg-db-user
+# BC_REG_DB_PASSWORD_KEY_NAME=bc-reg-db-password
+# EVENT_PROC_DB_HOST_KEY_NAME=event-proc-db-host
+# EVENT_PROC_DB_PORT_KEY_NAME=event-proc-db-port
+# EVENT_PROC_DB_DATABASE_KEY_NAME=event-proc-db-name
+# EVENT_PROC_DB_USER_KEY_NAME=event-proc-db-user
+# EVENT_PROC_DB_PASSWORD_KEY_NAME=event-proc-db-password
+# ORGBOOK_DB_HOST_KEY_NAME=orgbook-db-host
+# ORGBOOK_DB_PORT_KEY_NAME=orgbook-db-port
+# ORGBOOK_DB_DATABASE_KEY_NAME=orgbook-db-name
+# ORGBOOK_DB_USER_KEY_NAME=orgbook-db-user
+# ORGBOOK_DB_PASSWORD_KEY_NAME=orgbook-db-password
+# BC_REG_DB_HOST=
+# BC_REG_DB_PORT=5432
+# BC_REG_DB_DATABASE=BC_REGISTRIES
+# BC_REG_DB_USER=
+# BC_REG_DB_PASSWORD=
+# EVENT_PROC_DB_HOST=
+# EVENT_PROC_DB_PORT=5432
+# EVENT_PROC_DB_DATABASE=bc_reg_db
+# EVENT_PROC_DB_USER=
+# EVENT_PROC_DB_PASSWORD=
+# ORGBOOK_DB_HOST=
+# ORGBOOK_DB_PORT=5432
+# ORGBOOK_DB_DATABASE=aries-vcr
+# ORGBOOK_DB_USER=
+# ORGBOOK_DB_PASSWORD=
+# WEBHOOK_URL=
+# ENVIRONMENT_FRIENDLY_NAME=
+# ENVIRONMENT_NAME=
+# CONFIG_FILE_NAME=audit.conf
+# CONFIG_MAP_NAME=audit-conf
+# CONFIG_MOUNT_PATH=/opt/app-root/src/
+# CPU_REQUEST=0
+# CPU_LIMIT=0
+# MEMORY_REQUEST=0Mi
+# MEMORY_LIMIT=0Mi
