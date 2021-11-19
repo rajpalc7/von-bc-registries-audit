@@ -179,12 +179,10 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: webhook-url
-                - name: ENVIRONMENT_FRIENDLY_NAME
+                - name: FRIENDLY_PROJECT_NAME
                   value: ${ENVIRONMENT_FRIENDLY_NAME}
-                - name: ENVIRONMENT_NAME
+                - name: PROJECT_NAME
                   value: ${ENVIRONMENT_NAME}
-                - name: DATABASE_SERVER_TIMEOUT
-                  value: ${DATABASE_SERVER_TIMEOUT}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -405,6 +403,7 @@ parameters:
     description: The URL of the webhook to use for notifications.  If not specified, the webhook integration feature is disabled.
     required: false
     value: ""
+
   - name: ENVIRONMENT_FRIENDLY_NAME
     displayName: Friendly Environment Name
     description: The human readable name of the environment.  This variable is used by the webhook integration to identify the environment in which the backup notifications originate.
@@ -415,6 +414,7 @@ parameters:
     description: The name or Id of the environment.  This variable is used by the webhook integration to identify the environment in which the backup notifications originate.
     required: false
     value: ""
+
   - name: CONFIG_FILE_NAME
     displayName: Config File Name
     description: The name of the configuration file.
@@ -430,6 +430,7 @@ parameters:
     description: The path to use to mount the config file.
     required: true
     value: /opt/app-root/src/
+
   - name: CPU_REQUEST
     displayName: Resources CPU Request
     description: The resources CPU request (in cores) for this build.
