@@ -124,7 +124,7 @@ def get_bc_reg_corps():
             bc_reg_corp = bc_reg_corps[full_corp_num]
             corp_writer.writerow(bc_reg_corp)
 
-    return (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corps)
+    return get_bc_reg_corps_csv()
 
 
 def get_bc_reg_corps_csv():
@@ -238,7 +238,7 @@ def get_orgbook_all_corps():
             print(error)
             raise
 
-    return (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos)
+    return get_orgbook_all_corps_csv()
 
 
 def get_orgbook_all_corps_csv():
@@ -276,7 +276,7 @@ def get_event_proc_future_corps():
             corp_writer.writerow(corp)
             future_corps[corp["corp_num"]] = corp["corp_num"]
 
-    return future_corps
+    return get_event_proc_future_corps_csv()
 
 
 def get_event_proc_future_corps_csv():
