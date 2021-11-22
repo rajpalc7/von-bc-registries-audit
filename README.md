@@ -57,26 +57,6 @@ Note that by default this script only compares *non-revoked* credentials (as the
 AUDIT_ALL_CREDENTIALS=true ... python ./detail_audit_report_agent.py
 ```
 
-## OrgBook Search Database / Wallet Audit - Script Output
-
-This script prints out admin commands required to correct the data in OrgBook.  This can include deleting the existing OrgBook data and re-queuing data data from the BC Reg issuer.  Commands will look like the following example:
-
-```
-./manage -e prod queueOrganization CP0009876
-./manage -e prod queueOrganization 3456543
-./manage -e prod queueOrganization 3456789
-./manage -p bc -e prod deleteTopic BC1234567
-./manage -e prod requeueOrganization 1234567
-./manage -p bc -e prod deleteTopic BC1234589
-./manage -e prod requeueOrganization 1234589
-```
-
-The first 3 lines represent companies missing in OrgBook, and must be queued from BC Reg.
-
-The last 4 lines represent 2 companies in OrgBook that are incorrect and must be deleted and re-processed.
-
-These commands are run using `orgbook-configurations` or `von-bc-registries-agent-configurations` scripts.
-
 ## Running the audit in steps, using exported csv files.
 
 The audit process can be run in steps, where the initial steps extract data from each database, and then the final step reads data from the extracted csv files.  (For example, if you are running locally, want to audit the production databases, and can only port-map one database at a time.)
@@ -119,6 +99,44 @@ USE_CSV=true \
 ```
 
 No database information needs to be provided on the last step.
+
+
+## Understanding the Output
+
+The scripts print out three groups of messages, **Error Messages**, **Management Commands**, and an **Error Summary**.
+
+The **Error Messages** list the details of each of the discrepancies detected by the scripts.
+
+The **Management Commands** list the [orgbook-configurations](https://github.com/bcgov/orgbook-configurations) and/or [von-bc-registries-agent-configurations](https://github.com/bcgov/von-bc-registries-agent-configurations) management commands needed to fix the detected issues.
+
+The **Error Summary** provides a summary of the audit run and is produced whether or not there are any issues detected.
+
+### Management Commands
+
+These can include commands to delete the existing OrgBook data and re-queue the data from the BC Reg issuer.  Commands will look like the following example:
+
+```
+./manage -e prod queueOrganization CP0009876
+./manage -e prod queueOrganization 3456543
+./manage -e prod queueOrganization 3456789
+./manage -p bc -e prod deleteTopic BC1234567
+./manage -e prod requeueOrganization 1234567
+./manage -p bc -e prod deleteTopic BC1234589
+./manage -e prod requeueOrganization 1234589
+```
+
+In this example, the first 3 lines represent companies missing in OrgBook, and must be queued from BC Reg.
+
+The last 4 lines represent 2 companies in OrgBook that are incorrect and must be deleted and re-processed.
+
+The commands should be run in the order listed, however, if, for some reason, you need to run the commands in a batch, the `orgbook-configurations` scripts should always be run first.
+
+Commands in the following forms should be run using the openshift `./manage` scripts from [orgbook-configurations](https://github.com/bcgov/orgbook-configurations):
+- `./manage -p bc -e <env> deleteTopic <business_number>`
+
+Commands in the following forms should be run using the openshift `./manage` scripts from [von-bc-registries-agent-configurations](https://github.com/bcgov/von-bc-registries-agent-configurations):
+- `./manage -e <env> queueOrganization <business_number>`
+- `./manage -e <env> requeueOrganization <business_number>`
 
 ## Running on Docker
 
