@@ -68,7 +68,9 @@ if __name__ == "__main__":
         wrong_bus_num_str = str(wrong_bus_num)
         wrong_bus_num_str = wrong_bus_num_str.replace("'BC", "'")
         bn_requeue_sql = bn_requeue_sql.replace("$BN_CORP_LIST", wrong_bus_num_str)
-        log_error("Executing: " + bn_requeue_sql)
         if REQUEUE_WRONG_BN_CORPS and not USE_CSV:
+            log_error("Executing: " + bn_requeue_sql)
             count = post_db_sql("event_processor", bn_requeue_sql)
             log_error("Inserted row count: " + str(count))
+        else:
+            log_error("SQL to fix BN's: " + bn_requeue_sql)
