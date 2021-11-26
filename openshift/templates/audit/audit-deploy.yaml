@@ -96,6 +96,9 @@ objects:
                 - name: USE_CSV
                   value: ${USE_CSV}
 
+                - name: REQUEUE_WRONG_BN_CORPS
+                  value: ${REQUEUE_WRONG_BN_CORPS}
+
                 - name: BC_REG_DB_HOST
                   valueFrom:
                     secretKeyRef:
@@ -239,6 +242,12 @@ parameters:
   - name: USE_CSV
     displayName: USE_CSV
     description: USE_CSV
+    required: true
+    value: "false"
+
+  - name: REQUEUE_WRONG_BN_CORPS
+    displayName: Requeue Wrong Business Number Corps
+    description: Automatically requeue Corps that have a business number mismatch.
     required: true
     value: "false"
 

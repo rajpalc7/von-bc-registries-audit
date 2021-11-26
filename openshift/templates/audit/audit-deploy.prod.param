@@ -12,6 +12,7 @@
 # IMAGE_NAMESPACE=ca7f8f-tools
 TAG_NAME=prod
 # USE_CSV=false
+REQUEUE_WRONG_BN_CORPS=true
 # BC_REG_DB_HOST_KEY_NAME=bc-reg-db-host
 # BC_REG_DB_PORT_KEY_NAME=bc-reg-db-port
 # BC_REG_DB_DATABASE_KEY_NAME=bc-reg-db-name
