@@ -159,3 +159,5 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
         log_error(error_summary)
     else:
         log_info(error_summary)
+
+    return wrong_bus_num
