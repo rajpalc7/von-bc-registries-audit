@@ -130,6 +130,7 @@ def post_db_sql(db_name, sql, args=None):
         else:
             cursor.execute(sql)
         count = cursor.fetchone()[0]
+        conn.commit()
         cursor.close()
         cursor = None
         return count

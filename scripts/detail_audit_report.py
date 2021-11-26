@@ -15,6 +15,7 @@ from rocketchat_hooks import log_error, log_warning, log_info
 
 
 USE_CSV = (os.environ.get('USE_CSV', 'false').lower() == 'true')
+REQUEUE_WRONG_BN_CORPS = (os.environ.get('REQUEUE_WRONG_BN_CORPS', 'false').lower() == 'true')
 
 
 # mainline
@@ -68,6 +69,6 @@ if __name__ == "__main__":
         wrong_bus_num_str = wrong_bus_num_str.replace("'BC", "'")
         bn_requeue_sql = bn_requeue_sql.replace("$BN_CORP_LIST", wrong_bus_num_str)
         log_error("Executing: " + bn_requeue_sql)
-        if not USE_CSV:
+        if REQUEUE_WRONG_BN_CORPS and not USE_CSV:
             count = post_db_sql("event_processor", bn_requeue_sql)
             log_error("Inserted row count: " + str(count))
