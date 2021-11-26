@@ -76,13 +76,13 @@ def config(db_name):
 db_conns = {}
 
 # get (shared) connection to database
-def get_connection(db_name):
+def get_connection(db_name, readonly: bool = True):
     if db_name in db_conns and db_conns[db_name]:
         return db_conns[db_name]
 
     db_config = config(db_name)
     conn = psycopg2.connect(**db_config)
-    conn.set_session(readonly=True)
+    conn.set_session(readonly=readonly)
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED)
     db_conns[db_name] = conn
 
@@ -112,6 +112,32 @@ def get_db_sql(db_name, sql, args=None):
         LOGGER.error(error)
         LOGGER.error(traceback.print_exc())
         log_error("Exception reading DB: " + str(error))
+        raise 
+    finally:
+        if cursor is not None:
+            cursor.close()
+        cursor = None
+
+
+# post an update
+def post_db_sql(db_name, sql, args=None):
+    cursor = None
+    try:
+        conn = get_connection(db_name, readonly=False)
+        cursor = conn.cursor()
+        if args:
+            cursor.execute(sql, args)
+        else:
+            cursor.execute(sql)
+        count = cursor.fetchone()[0]
+        conn.commit()
+        cursor.close()
+        cursor = None
+        return count
+    except (Exception, psycopg2.DatabaseError) as error:
+        LOGGER.error(error)
+        LOGGER.error(traceback.print_exc())
+        log_error("Exception writing DB: " + str(error))
         raise 
     finally:
         if cursor is not None:
