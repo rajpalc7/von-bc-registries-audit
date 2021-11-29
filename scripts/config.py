@@ -77,14 +77,15 @@ db_conns = {}
 
 # get (shared) connection to database
 def get_connection(db_name, readonly: bool = True):
-    if db_name in db_conns and db_conns[db_name]:
-        return db_conns[db_name]
+    db_cache_name = db_name + "::" + str(readonly)
+    if db_cache_name in db_conns and db_conns[db_cache_name]:
+        return db_conns[db_cache_name]
 
     db_config = config(db_name)
     conn = psycopg2.connect(**db_config)
     conn.set_session(readonly=readonly)
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED)
-    db_conns[db_name] = conn
+    db_conns[db_cache_name] = conn
 
     return conn
 
