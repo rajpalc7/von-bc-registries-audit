@@ -96,6 +96,9 @@ objects:
                 - name: USE_CSV
                   value: ${USE_CSV}
 
+                - name: REQUEUE_WRONG_BN_CORPS
+                  value: ${REQUEUE_WRONG_BN_CORPS}
+
                 - name: BC_REG_DB_HOST
                   valueFrom:
                     secretKeyRef:
@@ -179,6 +182,8 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: webhook-url
+                - name: WEBHOOK_LEVEL
+                  value: ${WEBHOOK_LEVEL}
                 - name: FRIENDLY_PROJECT_NAME
                   value: ${ENVIRONMENT_FRIENDLY_NAME}
                 - name: PROJECT_NAME
@@ -239,6 +244,12 @@ parameters:
   - name: USE_CSV
     displayName: USE_CSV
     description: USE_CSV
+    required: true
+    value: "false"
+
+  - name: REQUEUE_WRONG_BN_CORPS
+    displayName: Requeue Wrong Business Number Corps
+    description: Automatically requeue Corps that have a business number mismatch.
     required: true
     value: "false"
 
@@ -403,6 +414,11 @@ parameters:
     description: The URL of the webhook to use for notifications.  If not specified, the webhook integration feature is disabled.
     required: false
     value: ""
+  - name: WEBHOOK_LEVEL
+    displayName: Webhook Log Level
+    description: The webhook log level filter; 0=Error, 1=Warning, 2=Info
+    required: false
+    value: "2"
 
   - name: ENVIRONMENT_FRIENDLY_NAME
     displayName: Friendly Environment Name
