@@ -8,6 +8,8 @@ import datetime
 
 import json
 
+from email_hooks import email_support
+
 
 LOG_LEVELS = {
     '0': 'ERROR',
@@ -33,7 +35,6 @@ def get_webhook_payload(level, message):
         "statusCode": LOG_LEVELS[level],
         "message": message
     }
-    #payload = json.dumps(payload)
     return payload
 
 
@@ -52,9 +53,9 @@ def synchronous_post_url(webhook_url, payload):
 
 
 def post_msg_to_webhook(level, message):
-    if webhook_url and 0 < len(webhook_url):
-        if level and level <= log_level:
-            payload = get_webhook_payload(level, message)
+    if level and level <= log_level:
+        payload = get_webhook_payload(level, message)
+        if webhook_url and 0 < len(webhook_url):
             try:
                 (status, text) = synchronous_post_url(webhook_url, payload)
                 print(">>> Posted webhook level", level, "with message:\n", message)
@@ -62,9 +63,19 @@ def post_msg_to_webhook(level, message):
             except Exception as e:
                 print(">>> NOT posted webhook, error:", str(e))
         else:
-            print(">>> NOT Posted webhook level", level, "(", log_level, "), message:\n", message)
+            print(">>> NOT Posted webhook level", level, "message:\n", message, "\n(no webhook_url)\n")
+
+        try:
+            success = email_support(payload)
+            if success:
+                print(">>> Sent email for level", level)
+            else:
+                print(">>> No email sent")
+        except Exception as e:
+            print(">>> NOT sent email, error:", str(e))
+
     else:
-        print(">>> NOT Posted webhook level", level, "message:\n", message, "\n(no webhook_url)\n")
+        print(">>> NOT Posted webhook level", level, "(", log_level, "), message:\n", message)
 
 
 def log_info(message):
