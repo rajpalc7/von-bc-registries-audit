@@ -18,6 +18,9 @@ objects:
     stringData:
       webhook-url: ${WEBHOOK_URL}
 
+      target-email: ${FEEDBACK_TARGET_EMAIL}
+      smtp-host: ${SMTP_SERVER_ADDRESS}
+
       ${BC_REG_DB_HOST_KEY_NAME}: ${BC_REG_DB_HOST}
       ${BC_REG_DB_PORT_KEY_NAME}: ${BC_REG_DB_PORT}
       ${BC_REG_DB_DATABASE_KEY_NAME}: ${BC_REG_DB_DATABASE}
@@ -188,6 +191,17 @@ objects:
                   value: ${ENVIRONMENT_FRIENDLY_NAME}
                 - name: PROJECT_NAME
                   value: ${ENVIRONMENT_NAME}
+
+                - name: FEEDBACK_TARGET_EMAIL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: target-email
+                - name: SMTP_SERVER_ADDRESS
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: smtp-host
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -214,7 +228,7 @@ parameters:
     displayName: Suffix
     description: A name suffix used for all objects
     required: false
-    value: 
+    value:
   - name: APP_NAME
     displayName: App Name
     description: Used to group components together in the OpenShift console.
@@ -335,7 +349,7 @@ parameters:
     displayName: BC_REG_DB_HOST
     description: BC_REG_DB_HOST
     required: true
-    value: 
+    value:
   - name: BC_REG_DB_PORT
     displayName: BC_REG_DB_PORT
     description: BC_REG_DB_PORT
@@ -350,18 +364,18 @@ parameters:
     displayName: BC_REG_DB_USER
     description: BC_REG_DB_USER
     required: true
-    value: 
+    value:
   - name: BC_REG_DB_PASSWORD
     displayName: BC_REG_DB_PASSWORD
     description: BC_REG_DB_PASSWORD
     required: true
-    value: 
+    value:
 
   - name: EVENT_PROC_DB_HOST
     displayName: EVENT_PROC_DB_HOST
     description: EVENT_PROC_DB_HOST
     required: true
-    value: 
+    value:
   - name: EVENT_PROC_DB_PORT
     displayName: EVENT_PROC_DB_PORT
     description: EVENT_PROC_DB_PORT
@@ -376,18 +390,18 @@ parameters:
     displayName: EVENT_PROC_DB_USER
     description: EVENT_PROC_DB_USER
     required: true
-    value: 
+    value:
   - name: EVENT_PROC_DB_PASSWORD
     displayName: EVENT_PROC_DB_PASSWORD
     description: EVENT_PROC_DB_PASSWORD
     required: true
-    value: 
+    value:
 
   - name: ORGBOOK_DB_HOST
     displayName: ORGBOOK_DB_HOST
     description: ORGBOOK_DB_HOST
     required: true
-    value: 
+    value:
   - name: ORGBOOK_DB_PORT
     displayName: ORGBOOK_DB_PORT
     description: ORGBOOK_DB_PORT
@@ -402,12 +416,12 @@ parameters:
     displayName: ORGBOOK_DB_USER
     description: ORGBOOK_DB_USER
     required: true
-    value: 
+    value:
   - name: ORGBOOK_DB_PASSWORD
     displayName: ORGBOOK_DB_PASSWORD
     description: ORGBOOK_DB_PASSWORD
     required: true
-    value: 
+    value:
 
   - name: WEBHOOK_URL
     displayName: Webhook URL
@@ -428,6 +442,17 @@ parameters:
   - name: ENVIRONMENT_NAME
     displayName: Environment Name (Environment Id)
     description: The name or Id of the environment.  This variable is used by the webhook integration to identify the environment in which the backup notifications originate.
+    required: false
+    value: ""
+
+  - name: FEEDBACK_TARGET_EMAIL
+    displayName: Feedback Target Url
+    description: The email address to which the feedback is to be delivered.
+    required: false
+    value: ""
+  - name: SMTP_SERVER_ADDRESS
+    displayName: SMTP Server Address
+    description: The SMTP server address used for sending email.
     required: false
     value: ""
 
