@@ -8,13 +8,30 @@ import decimal
 import requests
 import csv
 
-from config import get_connection, get_db_sql, get_sql_record_count, post_db_sql, CORP_TYPES_IN_SCOPE, corp_num_with_prefix, bare_corp_num
-from orgbook_data_load import get_orgbook_all_corps, get_orgbook_all_corps_csv, get_event_proc_future_corps, get_event_proc_future_corps_csv, get_bc_reg_corps, get_bc_reg_corps_csv
+from config import (
+    get_connection,
+    get_db_sql,
+    get_sql_record_count,
+    post_db_sql,
+    CORP_TYPES_IN_SCOPE,
+    LEAR_CORP_TYPES_IN_SCOPE,
+    corp_num_with_prefix,
+    bare_corp_num,
+)
+from orgbook_data_load import (
+    get_orgbook_all_corps,
+    get_orgbook_all_corps_csv,
+    get_event_proc_future_corps,
+    get_event_proc_future_corps_csv,
+    get_bc_reg_corps, 
+    get_bc_reg_corps_csv,
+)
 from orgbook_data_audit import compare_bc_reg_orgbook
 from rocketchat_hooks import log_error, log_warning, log_info
 
 
 USE_CSV = (os.environ.get('USE_CSV', 'false').lower() == 'true')
+USE_LEAR = (os.environ.get('USE_LEAR', 'false').lower() == 'true')
 REQUEUE_WRONG_BN_CORPS = (os.environ.get('REQUEUE_WRONG_BN_CORPS', 'false').lower() == 'true')
 
 
@@ -31,19 +48,19 @@ if __name__ == "__main__":
     if USE_CSV:
         (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos) = get_orgbook_all_corps_csv()
     else:
-        (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos) = get_orgbook_all_corps()
+        (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos) = get_orgbook_all_corps(USE_LEAR=USE_LEAR)
 
     # corps that are still in the event processor queue waiting to be processed (won't be in orgbook yet)
     if USE_CSV:
         future_corps = get_event_proc_future_corps_csv()
     else:
-        future_corps = get_event_proc_future_corps()
+        future_corps = get_event_proc_future_corps(USE_LEAR=USE_LEAR)
 
     # check if all the BC Reg corps are in orgbook (with the same corp type)
     if USE_CSV:
         (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos) = get_bc_reg_corps_csv()
     else:
-        (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos) = get_bc_reg_corps()
+        (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos) = get_bc_reg_corps(USE_LEAR=USE_LEAR)
 
     # do the orgbook/bc reg compare
     wrong_bus_num = compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos, orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos, future_corps)

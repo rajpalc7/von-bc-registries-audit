@@ -8,7 +8,15 @@ import decimal
 import requests
 import csv
 
-from config import get_connection, get_db_sql, get_sql_record_count, CORP_TYPES_IN_SCOPE, corp_num_with_prefix, bare_corp_num
+from config import (
+    get_connection,
+    get_db_sql,
+    get_sql_record_count,
+    CORP_TYPES_IN_SCOPE,
+    LEAR_CORP_TYPES_IN_SCOPE,
+    corp_num_with_prefix,
+    bare_corp_num,
+)
 
 
 QUERY_LIMIT = '200000'
@@ -22,7 +30,19 @@ TOPIC_NAME_SEARCH = "/search/topic?inactive=false&latest=true&revoked=false&name
 TOPIC_ID_SEARCH = "/search/topic?inactive=false&latest=true&revoked=false&topic_id="
 
 
-def get_bc_reg_corps():
+def get_bc_reg_corps(USE_LEAR: bool = False):
+    """
+    Reads all corps and corp types from the BC Reg database and writes to a csv file.
+    """
+
+    # short circuit for new LEAR database
+    if USE_LEAR:
+        return get_bc_reg_lear_corps()
+    else:
+        return get_bc_reg_colin_corps()
+
+
+def get_bc_reg_colin_corps():
     """
     Reads all corps and corp types from the BC Reg database and writes to a csv file.
     """
@@ -157,7 +177,78 @@ def get_bc_reg_corps_csv():
     return (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos)
 
 
-def get_orgbook_all_corps():
+def get_bc_reg_lear_corps():
+    """
+    Reads all corps and corp types from the BC Reg LEAR database and writes to a csv file.
+    """
+
+    # run this query against BC Reg LEAR database:
+    sql1 = """
+            select
+                identifier as corp_num,
+                legal_type as corp_typ_cd,
+                founding_date as recognition_dts,
+                tax_id as bn_9,
+                legal_name as corp_nme,
+                '' as corp_nme_as,
+                'BC' as can_jur_typ_cd,
+                '' as xpro_typ_cd,
+                '' as othr_juris_desc,
+                state as state_typ_cd,
+                '' as corp_class
+            from businesses
+            where legal_type in ('SP', 'GP');
+    """
+
+    bc_reg_corps = {}
+    bc_reg_corp_types = {}
+    bc_reg_corp_names = {}
+    bc_reg_count = 0
+    with open('export/bc_reg_corps.csv', mode='w') as corp_file:
+        fieldnames = ["corp_num", "corp_type", "corp_name", "recognition_dts", "bn_9", "can_jur_typ_cd", "xpro_typ_cd", "othr_juris_desc", "state_typ_cd", "op_state_typ_cd", "corp_class"]
+        corp_writer = csv.DictWriter(corp_file, fieldnames=fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        corp_writer.writeheader()
+
+        print("Get corp stats from BC Registries LEAR DB", datetime.datetime.now())
+        start_time = time.perf_counter()
+        processed_count = 0
+        bc_reg_recs = get_db_sql("bc_reg_lear", sql1)
+        for bc_reg_rec in bc_reg_recs:
+            if bc_reg_rec['corp_typ_cd'] in LEAR_CORP_TYPES_IN_SCOPE:
+                bc_reg_count = bc_reg_count + 1
+                full_corp_num = corp_num_with_prefix(bc_reg_rec['corp_typ_cd'], bc_reg_rec['corp_num'])
+                corp_name = bc_reg_rec['corp_nme']
+                bn_9 = ""
+                # take the first 9 digist as the BN9, but only if there are 9 or more digits
+                # (otherwise assume it's just bad data)
+                if bc_reg_rec['bn_9'] and 9 <= len(bc_reg_rec['bn_9']):
+                    bn_9 = bc_reg_rec['bn_9'][:9]
+                state_type = 'ACT' if bc_reg_rec['state_typ_cd'] == 'ACTIVE' else 'HIS'
+                bc_reg_corp = {
+                    "corp_num": full_corp_num,
+                    "corp_type": bc_reg_rec['corp_typ_cd'],
+                    "corp_name": corp_name,
+                    "recognition_dts": bc_reg_rec['recognition_dts'],
+                    "bn_9": bn_9,
+                    "can_jur_typ_cd": bc_reg_rec['can_jur_typ_cd'],
+                    "xpro_typ_cd": bc_reg_rec['xpro_typ_cd'],
+                    "othr_juris_desc": bc_reg_rec['othr_juris_desc'],
+                    "state_typ_cd": state_type,
+                    "op_state_typ_cd": state_type,
+                    "corp_class": bc_reg_rec['corp_class'],
+                }
+                bc_reg_corps[full_corp_num] = bc_reg_corp
+                bc_reg_corp_types[bc_reg_corp["corp_num"]] = bc_reg_corp["corp_type"]
+                bc_reg_corp_names[bc_reg_corp["corp_num"]] = bc_reg_corp["corp_name"]
+
+        for full_corp_num in bc_reg_corps:
+            bc_reg_corp = bc_reg_corps[full_corp_num]
+            corp_writer.writerow(bc_reg_corp)
+
+    return get_bc_reg_corps_csv()
+
+
+def get_orgbook_all_corps(USE_LEAR: bool = False):
     """
     Reads all companies from the orgbook database
     """
@@ -167,6 +258,11 @@ def get_orgbook_all_corps():
     except (Exception) as error:
         print(error)
         raise
+
+    if USE_LEAR:
+        corp_types_filter = CORP_TYPES_IN_SCOPE
+    else:
+        corp_types_filter = LEAR_CORP_TYPES_IN_SCOPE
 
     # get all the corps from orgbook
     print("Get corp stats from OrgBook DB", datetime.datetime.now())
@@ -219,20 +315,22 @@ def get_orgbook_all_corps():
             cur = conn.cursor()
             cur.execute(sql4)
             for row in cur:
-                orgbook_corp_types[row[0]] = row[1]
-                corp_name = row[4] if (row[4] and 0 < len(row[4])) else row[3]
-                orgbook_corp_names[row[0]] = corp_name
-                write_corp = {
-                    "corp_num": row[0],
-                    "corp_type": row[1],
-                    "registration_date": row[2],
-                    "corp_name":corp_name,
-                    "home_jurisdiction": row[5],
-                    "entity_status": row[6],
-                    "bus_num": row[7],
-                }
-                corp_writer.writerow(write_corp)
-                orgbook_corp_infos[row[0]] = write_corp
+                # row[1] is the corp_type
+                if row[1] in corp_types_filter:
+                    orgbook_corp_types[row[0]] = row[1]
+                    corp_name = row[4] if (row[4] and 0 < len(row[4])) else row[3]
+                    orgbook_corp_names[row[0]] = corp_name
+                    write_corp = {
+                        "corp_num": row[0],
+                        "corp_type": row[1],
+                        "registration_date": row[2],
+                        "corp_name":corp_name,
+                        "home_jurisdiction": row[5],
+                        "entity_status": row[6],
+                        "bus_num": row[7],
+                    }
+                    corp_writer.writerow(write_corp)
+                    orgbook_corp_infos[row[0]] = write_corp
             cur.close()
         except (Exception) as error:
             print(error)
@@ -255,7 +353,20 @@ def get_orgbook_all_corps_csv():
     return (orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos)
 
 
-def get_event_proc_future_corps():
+def get_event_proc_future_corps(USE_LEAR: bool = False):
+    """
+    Reads from the event processor database and writes to a csv file:
+    - corps queued for future processing (we don't check if these are in orgbook or not)
+    """
+
+    # short circuit for new LEAR database
+    if USE_LEAR:
+        return get_event_proc_future_lear_corps()
+    else:
+        return get_event_proc_future_colin_corps()
+
+
+def get_event_proc_future_colin_corps():
     """
     Reads from the event processor database and writes to a csv file:
     - corps queued for future processing (we don't check if these are in orgbook or not)
@@ -291,6 +402,9 @@ def get_event_proc_future_corps_csv():
 
     return future_corps
 
+
+def get_event_proc_future_lear_corps():
+    pass
 
 def get_event_proc_audit_corps():
     """

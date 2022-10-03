@@ -45,6 +45,10 @@ CORP_TYPES_IN_SCOPE = {
     "XS":  "XPRO SOCIETY",
 }
 
+LEAR_CORP_TYPES_IN_SCOPE = {
+    "GP":  "PARTNERSHIP",
+    "SP":  "SOLE PROP",
+}
 
 def config(db_name):
     db = {}
@@ -54,6 +58,12 @@ def config(db_name):
         db['database'] = os.environ.get('BC_REG_DB_DATABASE', 'BC_REGISTRIES')
         db['user'] = os.environ.get('BC_REG_DB_USER', '')
         db['password'] = os.environ.get('BC_REG_DB_PASSWORD', '')
+    elif db_name == 'bc_reg_lear':
+        db['host'] = os.environ.get('LEAR_DB_HOST', 'localhost')
+        db['port'] = os.environ.get('LEAR_DB_PORT', '5454')
+        db['database'] = os.environ.get('LEAR_DB_DATABASE', 'lear')
+        db['user'] = os.environ.get('LEAR_DB_USER', '')
+        db['password'] = os.environ.get('LEAR_DB_PASSWORD', '')
     elif db_name == 'event_processor':
         db['host'] = os.environ.get('EVENT_PROC_DB_HOST', 'localhost')
         db['port'] = os.environ.get('EVENT_PROC_DB_PORT', '5444')
@@ -166,17 +176,23 @@ def get_sql_record_count(db_name, sql):
         cur = None
 
 
+def starts_with_bc(corp_num):
+    if corp_num.startswith('BC'):
+        return corp_num
+    return 'BC' + corp_num
+
+
 # corp num with prefix
 def corp_num_with_prefix(corp_typ_cd, corp_num):
     p_corp_num = corp_num
     if corp_typ_cd == 'BC':
-        p_corp_num = 'BC' + corp_num
+        p_corp_num = starts_with_bc(corp_num)
     elif corp_typ_cd == 'ULC':
-        p_corp_num = 'BC' + corp_num
+        p_corp_num = starts_with_bc(corp_num)
     elif corp_typ_cd == 'CC':
-        p_corp_num = 'BC' + corp_num
+        p_corp_num = starts_with_bc(corp_num)
     elif corp_typ_cd == 'BEN':
-        p_corp_num = 'BC' + corp_num
+        p_corp_num = starts_with_bc(corp_num)
     return p_corp_num
 
 
