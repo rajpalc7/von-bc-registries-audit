@@ -13,6 +13,8 @@ from config import (
     get_db_sql,
     get_sql_record_count,
     post_db_sql,
+    BCREG_SYSTEM_TYPE,
+    LEAR_SYSTEM_TYPE,
     CORP_TYPES_IN_SCOPE,
     LEAR_CORP_TYPES_IN_SCOPE,
     corp_num_with_prefix,

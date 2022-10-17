@@ -12,6 +12,8 @@ from config import (
     get_connection,
     get_db_sql,
     get_sql_record_count,
+    BCREG_SYSTEM_TYPE,
+    LEAR_SYSTEM_TYPE,
     CORP_TYPES_IN_SCOPE,
     LEAR_CORP_TYPES_IN_SCOPE,
     corp_num_with_prefix,
@@ -361,19 +363,19 @@ def get_event_proc_future_corps(USE_LEAR: bool = False):
 
     # short circuit for new LEAR database
     if USE_LEAR:
-        return get_event_proc_future_lear_corps()
+        return get_event_proc_future_db_corps(LEAR_SYSTEM_TYPE)
     else:
-        return get_event_proc_future_colin_corps()
+        return get_event_proc_future_db_corps(BCREG_SYSTEM_TYPE)
 
 
-def get_event_proc_future_colin_corps():
+def get_event_proc_future_db_corps(system_type_cd):
     """
     Reads from the event processor database and writes to a csv file:
     - corps queued for future processing (we don't check if these are in orgbook or not)
     """
     corps = []
     future_corps = {}
-    sql1 = """SELECT corp_num FROM event_by_corp_filing WHERE process_date is null;"""
+    sql1 = """SELECT corp_num FROM event_by_corp_filing WHERE process_date is null and SYSTEM_TYPE_CD = '""" + system_type_cd + """';"""
     corp_recs = get_db_sql("event_processor", sql1)
     if 0 < len(corp_recs):
         for corp_rec in corp_recs:
@@ -402,9 +404,6 @@ def get_event_proc_future_corps_csv():
 
     return future_corps
 
-
-def get_event_proc_future_lear_corps():
-    pass
 
 def get_event_proc_audit_corps():
     """

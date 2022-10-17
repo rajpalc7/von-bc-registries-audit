@@ -9,6 +9,9 @@ from rocketchat_hooks import log_error, log_warning, log_info
 
 LOGGER = logging.getLogger(__name__)
 
+BCREG_SYSTEM_TYPE = "BC_REG"
+LEAR_SYSTEM_TYPE = "BCREG_LEAR"
+
 CORP_TYPES_IN_SCOPE = {
     "A":   "EXTRA PRO",
     "B":   "EXTRA PRO",
