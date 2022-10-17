@@ -3,6 +3,7 @@ import os
 import psycopg2
 import datetime
 import time
+import pytz
 import json
 import decimal
 import requests
@@ -230,7 +231,7 @@ def get_bc_reg_lear_corps():
                     "corp_num": full_corp_num,
                     "corp_type": bc_reg_rec['corp_typ_cd'],
                     "corp_name": corp_name,
-                    "recognition_dts": bc_reg_rec['recognition_dts'],
+                    "recognition_dts": bc_reg_rec['recognition_dts'].astimezone(pytz.utc).isoformat(),
                     "bn_9": bn_9,
                     "can_jur_typ_cd": bc_reg_rec['can_jur_typ_cd'],
                     "xpro_typ_cd": bc_reg_rec['xpro_typ_cd'],
@@ -262,9 +263,9 @@ def get_orgbook_all_corps(USE_LEAR: bool = False):
         raise
 
     if USE_LEAR:
-        corp_types_filter = CORP_TYPES_IN_SCOPE
-    else:
         corp_types_filter = LEAR_CORP_TYPES_IN_SCOPE
+    else:
+        corp_types_filter = CORP_TYPES_IN_SCOPE
 
     # get all the corps from orgbook
     print("Get corp stats from OrgBook DB", datetime.datetime.now())

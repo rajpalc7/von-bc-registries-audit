@@ -65,7 +65,7 @@ if __name__ == "__main__":
         (bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos) = get_bc_reg_corps(USE_LEAR=USE_LEAR)
 
     # do the orgbook/bc reg compare
-    wrong_bus_num = compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos, orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos, future_corps)
+    wrong_bus_num = compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos, orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos, future_corps, USE_LEAR=USE_LEAR)
 
     if 0 < len(wrong_bus_num):
         bn_requeue_sql = """
