@@ -45,8 +45,22 @@ def get_corp_jurisdiction(corp_typ_cd, corp_class, can_jur_typ_cd, othr_juris_de
     return registered_jurisdiction
 
 
+def compare_dates_lear(orgbook_reg_dt, bc_reg_reg_dt):
+    # convert to string if necessary
+    if isinstance(orgbook_reg_dt, datetime.datetime):
+        orgbook_reg_dt = orgbook_reg_dt.astimezone(pytz.utc).isoformat()
+    if isinstance(bc_reg_reg_dt, datetime.datetime):
+        bc_reg_reg_dt = bc_reg_reg_dt.astimezone(pytz.utc).isoformat()
+    if bc_reg_reg_dt is None or len(bc_reg_reg_dt) == 0:
+        if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0:
+            return True
+        return False
+    if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0:
+        return False
+    return (bc_reg_reg_dt == orgbook_reg_dt)
+
 # compare registration dates
-def compare_dates(orgbook_reg_dt, bc_reg_reg_dt):
+def compare_dates_colin(orgbook_reg_dt, bc_reg_reg_dt):
     if bc_reg_reg_dt is None or len(bc_reg_reg_dt) == 0:
         if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0:
             return True
@@ -61,7 +75,14 @@ def compare_dates(orgbook_reg_dt, bc_reg_reg_dt):
     except (Exception) as error:
         return MIN_START_DATE_TZ.astimezone(pytz.utc).isoformat() == orgbook_reg_dt
 
-def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos, orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos, future_corps):
+# compare registration dates
+def compare_dates(orgbook_reg_dt, bc_reg_reg_dt, USE_LEAR: bool = False):
+    if USE_LEAR:
+        return compare_dates_lear(orgbook_reg_dt, bc_reg_reg_dt)
+    else:
+        return compare_dates_colin(orgbook_reg_dt, bc_reg_reg_dt)
+
+def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos, orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos, future_corps, USE_LEAR: bool = False):
     missing_in_orgbook = []
     missing_in_bcreg = []
     wrong_corp_type = []
@@ -111,7 +132,7 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
             wrong_bus_num.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
             error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
-        elif (not compare_dates(orgbook_corp_infos[bc_reg_corp_num]["registration_date"], bc_reg_corp_info["recognition_dts"])):
+        elif (not compare_dates(orgbook_corp_infos[bc_reg_corp_num]["registration_date"], bc_reg_corp_info["recognition_dts"], USE_LEAR=USE_LEAR)):
             # wrong registration date
             error_msgs += "Corp Registration Date mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["recognition_dts"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["registration_date"]+'"' + "\n"
             wrong_corp_reg_dt.append(bc_reg_corp_num)

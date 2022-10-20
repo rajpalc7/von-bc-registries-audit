@@ -27,6 +27,12 @@ objects:
       ${BC_REG_DB_USER_KEY_NAME}: ${BC_REG_DB_USER}
       ${BC_REG_DB_PASSWORD_KEY_NAME}: ${BC_REG_DB_PASSWORD}
 
+      ${LEAR_DB_HOST_KEY_NAME}: ${LEAR_DB_HOST}
+      ${LEAR_DB_PORT_KEY_NAME}: ${LEAR_DB_PORT}
+      ${LEAR_DB_DATABASE_KEY_NAME}: ${LEAR_DB_DATABASE}
+      ${LEAR_DB_USER_KEY_NAME}: ${LEAR_DB_USER}
+      ${LEAR_DB_PASSWORD_KEY_NAME}: ${LEAR_DB_PASSWORD}
+
       ${EVENT_PROC_DB_HOST_KEY_NAME}: ${EVENT_PROC_DB_HOST}
       ${EVENT_PROC_DB_PORT_KEY_NAME}: ${EVENT_PROC_DB_PORT}
       ${EVENT_PROC_DB_DATABASE_KEY_NAME}: ${EVENT_PROC_DB_DATABASE}
@@ -99,6 +105,9 @@ objects:
                 - name: USE_CSV
                   value: ${USE_CSV}
 
+                - name: USE_LEAR
+                  value: ${USE_LEAR}
+
                 - name: REQUEUE_WRONG_BN_CORPS
                   value: ${REQUEUE_WRONG_BN_CORPS}
 
@@ -127,6 +136,32 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: ${BC_REG_DB_PASSWORD_KEY_NAME}
+
+                - name: LEAR_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${LEAR_DB_HOST_KEY_NAME}
+                - name: LEAR_DB_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${LEAR_DB_PORT_KEY_NAME}
+                - name: LEAR_DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${LEAR_DB_DATABASE_KEY_NAME}
+                - name: LEAR_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${LEAR_DB_USER_KEY_NAME}
+                - name: LEAR_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${LEAR_DB_PASSWORD_KEY_NAME}
 
                 - name: EVENT_PROC_DB_HOST
                   valueFrom:
@@ -293,6 +328,32 @@ parameters:
     required: true
     value: bc-reg-db-password
 
+  - name: LEAR_DB_HOST_KEY_NAME
+    displayName: LEAR_DB_HOST_KEY_NAME
+    description: LEAR_DB_HOST_KEY_NAME
+    required: true
+    value: lear-db-host
+  - name: LEAR_DB_PORT_KEY_NAME
+    displayName: LEAR_DB_PORT_KEY_NAME
+    description: LEAR_DB_PORT_KEY_NAME
+    required: true
+    value: lear-db-port
+  - name: LEAR_DB_DATABASE_KEY_NAME
+    displayName: LEAR_DB_DATABASE_KEY_NAME
+    description: LEAR_DB_DATABASE_KEY_NAME
+    required: true
+    value: lear-db-name
+  - name: LEAR_DB_USER_KEY_NAME
+    displayName: LEAR_DB_USER_KEY_NAME
+    description: LEAR_DB_USER_KEY_NAME
+    required: true
+    value: lear-db-user
+  - name: LEAR_DB_PASSWORD_KEY_NAME
+    displayName: LEAR_DB_PASSWORD_KEY_NAME
+    description: LEAR_DB_PASSWORD_KEY_NAME
+    required: true
+    value: lear-db-password
+
   - name: EVENT_PROC_DB_HOST_KEY_NAME
     displayName: EVENT_PROC_DB_HOST_KEY_NAME
     description: EVENT_PROC_DB_HOST_KEY_NAME
@@ -368,6 +429,37 @@ parameters:
   - name: BC_REG_DB_PASSWORD
     displayName: BC_REG_DB_PASSWORD
     description: BC_REG_DB_PASSWORD
+    required: true
+    value:
+
+  - name: USE_LEAR
+    displayName: USE_LEAR
+    description: USE_LEAR
+    required: true
+    value: "false"
+  - name: LEAR_DB_HOST
+    displayName: LEAR_DB_HOST
+    description: LEAR_DB_HOST
+    required: true
+    value:
+  - name: LEAR_DB_PORT
+    displayName: LEAR_DB_PORT
+    description: LEAR_DB_PORT
+    required: true
+    value: "5432"
+  - name: LEAR_DB_DATABASE
+    displayName: LEAR_DB_DATABASE
+    description: LEAR_DB_DATABASE
+    required: true
+    value: lear
+  - name: LEAR_DB_USER
+    displayName: LEAR_DB_USER
+    description: LEAR_DB_USER
+    required: true
+    value:
+  - name: LEAR_DB_PASSWORD
+    displayName: LEAR_DB_PASSWORD
+    description: LEAR_DB_PASSWORD
     required: true
     value:
 

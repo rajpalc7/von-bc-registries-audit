@@ -28,6 +28,12 @@ if createOperation; then
   readParameter "BC_REG_DB_USER - Please provide the database username:" BC_REG_DB_USER "" "false"
   readParameter "BC_REG_DB_PASSWORD - Please provide the password for the database:" BC_REG_DB_PASSWORD "" "false"
 
+  readParameter "LEAR_DB_HOST - Please provide the name of the database host:" LEAR_DB_HOST "" "false"
+  readParameter "LEAR_DB_PORT - Please provide the port number for the database:" LEAR_DB_PORT "" "false"
+  readParameter "LEAR_DB_DATABASE - Please provide the name of the database:" LEAR_DB_DATABASE "" "false"
+  readParameter "LEAR_DB_USER - Please provide the database username:" LEAR_DB_USER "" "false"
+  readParameter "LEAR_DB_PASSWORD - Please provide the password for the database:" LEAR_DB_PASSWORD "" "false"
+
   readParameter "EVENT_PROC_DB_HOST - Please provide the name of the database host:" EVENT_PROC_DB_HOST "" "false"
   readParameter "EVENT_PROC_DB_PORT - Please provide the port number for the database:" EVENT_PROC_DB_PORT "" "false"
   readParameter "EVENT_PROC_DB_DATABASE - Please provide the name of the database:" EVENT_PROC_DB_DATABASE "" "false"
@@ -54,6 +60,12 @@ else
   writeParameter "BC_REG_DB_DATABASE" "prompt_skipped" "false"
   writeParameter "BC_REG_DB_USER" "prompt_skipped" "false"
   writeParameter "BC_REG_DB_PASSWORD" "prompt_skipped" "false"
+
+  writeParameter "LEAR_DB_HOST" "prompt_skipped" "false"
+  writeParameter "LEAR_DB_PORT" "prompt_skipped" "false"
+  writeParameter "LEAR_DB_DATABASE" "prompt_skipped" "false"
+  writeParameter "LEAR_DB_USER" "prompt_skipped" "false"
+  writeParameter "LEAR_DB_PASSWORD" "prompt_skipped" "false"
 
   writeParameter "EVENT_PROC_DB_HOST" "prompt_skipped" "false"
   writeParameter "EVENT_PROC_DB_PORT" "prompt_skipped" "false"

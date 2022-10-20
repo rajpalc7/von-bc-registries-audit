@@ -11,6 +11,8 @@ import csv
 from config import get_connection, get_db_sql, get_sql_record_count, CORP_TYPES_IN_SCOPE, corp_num_with_prefix, bare_corp_num
 from orgbook_data_load import get_event_proc_future_corps, get_event_proc_audit_corps
 
+USE_LEAR = (os.environ.get('USE_LEAR', 'false').lower() == 'true')
+
 
 # mainline
 if __name__ == "__main__":
@@ -20,5 +22,5 @@ if __name__ == "__main__":
     - corps queued for future processing (we don't check if these are in orgbook or not)
     - all corps in the event processor audit log
     """
-    get_event_proc_future_corps()
-    get_event_proc_audit_corps()
+    get_event_proc_future_corps(USE_LEAR=USE_LEAR)
+    get_event_proc_audit_corps(USE_LEAR=USE_LEAR)
