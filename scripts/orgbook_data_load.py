@@ -406,7 +406,7 @@ def get_event_proc_future_corps_csv():
     return future_corps
 
 
-def get_event_proc_audit_corps():
+def get_event_proc_audit_corps(USE_LEAR: bool = False):
     """
     Reads from the event processor database and writes to a csv file:
     - all corps in the event processor audit log
