@@ -105,6 +105,9 @@ objects:
                 - name: USE_CSV
                   value: ${USE_CSV}
 
+                - name: USE_LEAR
+                  value: ${USE_LEAR}
+
                 - name: REQUEUE_WRONG_BN_CORPS
                   value: ${REQUEUE_WRONG_BN_CORPS}
 
@@ -429,6 +432,11 @@ parameters:
     required: true
     value:
 
+  - name: USE_LEAR
+    displayName: USE_LEAR
+    description: USE_LEAR
+    required: true
+    value: "false"
   - name: LEAR_DB_HOST
     displayName: LEAR_DB_HOST
     description: LEAR_DB_HOST
@@ -443,7 +451,7 @@ parameters:
     displayName: LEAR_DB_DATABASE
     description: LEAR_DB_DATABASE
     required: true
-    value: BC_REGISTRIES
+    value: lear
   - name: LEAR_DB_USER
     displayName: LEAR_DB_USER
     description: LEAR_DB_USER
