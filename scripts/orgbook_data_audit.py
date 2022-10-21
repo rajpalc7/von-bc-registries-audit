@@ -51,11 +51,11 @@ def compare_dates_lear(orgbook_reg_dt, bc_reg_reg_dt):
         orgbook_reg_dt = orgbook_reg_dt.astimezone(pytz.utc).isoformat()
     if isinstance(bc_reg_reg_dt, datetime.datetime):
         bc_reg_reg_dt = bc_reg_reg_dt.astimezone(pytz.utc).isoformat()
-    if bc_reg_reg_dt is None or len(bc_reg_reg_dt) == 0:
-        if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0:
+    if bc_reg_reg_dt is None or len(bc_reg_reg_dt) == 0 or bc_reg_reg_dt.startswith('0001-01-01'):
+        if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0 or orgbook_reg_dt.startswith('0001-01-01'):
             return True
         return False
-    if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0:
+    if orgbook_reg_dt is None or len(orgbook_reg_dt) == 0 or orgbook_reg_dt.startswith('0001-01-01'):
         return False
     return (bc_reg_reg_dt == orgbook_reg_dt)
 
