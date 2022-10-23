@@ -93,6 +93,10 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
     wrong_corp_juris = []
 
     # check if all the BC Reg corps are in orgbook (with the same corp type)
+    if USE_LEAR:
+        cmd_pfx = "Lear"
+    else:
+        cmd_pfx = ""
     error_msgs = ""
     error_cmds = ""
     for bc_reg_corp_num in bc_reg_corp_types:
@@ -106,45 +110,45 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
             # not in orgbook
             error_msgs += "Topic not found for: " + bc_reg_corp_num + "\n"
             missing_in_orgbook.append(bc_reg_corp_num)
-            error_cmds += "./manage -e prod queueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod queueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
             pass
         elif (not orgbook_corp_types[bc_reg_corp_num]) or (orgbook_corp_types[bc_reg_corp_num] != bc_reg_corp_type):
             # in orgbook but has the wrong corp type in orgbook
             error_msgs += "Corp Type mis-match for: " + bc_reg_corp_num + '; BC Reg: "'+bc_reg_corp_type+'", OrgBook: "'+orgbook_corp_types[bc_reg_corp_num]+'"' + "\n"
             wrong_corp_type.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
-            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod requeueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_names[bc_reg_corp_num].strip() != bc_reg_corp_name.strip()):
             # in orgbook but has the wrong corp name in orgbook
             error_msgs += "Corp Name mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_name+'", OrgBook: "'+orgbook_corp_names[bc_reg_corp_num]+'"' + "\n"
             wrong_corp_name.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
-            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod requeueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_infos[bc_reg_corp_num]["entity_status"] != bc_reg_corp_info["op_state_typ_cd"]):
             # wrong entity status
             error_msgs += "Corp Status mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["op_state_typ_cd"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["entity_status"]+'"' + "\n"
             wrong_corp_status.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
-            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod requeueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_infos[bc_reg_corp_num]["bus_num"].strip() != bc_reg_corp_info["bn_9"].strip()):
             # wrong BN9 business number
             error_msgs += "Business Number mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["bn_9"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["bus_num"]+'"' + "\n"
             wrong_bus_num.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
-            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod requeueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (not compare_dates(orgbook_corp_infos[bc_reg_corp_num]["registration_date"], bc_reg_corp_info["recognition_dts"], USE_LEAR=USE_LEAR)):
             # wrong registration date
             error_msgs += "Corp Registration Date mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_info["recognition_dts"]+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["registration_date"]+'"' + "\n"
             wrong_corp_reg_dt.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
-            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod requeueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
         elif (orgbook_corp_infos[bc_reg_corp_num]["home_jurisdiction"] != get_corp_jurisdiction(bc_reg_corp_info["corp_type"], bc_reg_corp_info["corp_class"], bc_reg_corp_info["can_jur_typ_cd"], bc_reg_corp_info["othr_juris_desc"])):
             # wrong jurisdiction
             calc_juris = get_corp_jurisdiction(bc_reg_corp_info["corp_type"], bc_reg_corp_info["corp_class"], bc_reg_corp_info["can_jur_typ_cd"], bc_reg_corp_info["othr_juris_desc"])
             error_msgs += "Corp Jurisdiction mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+calc_juris+'", OrgBook: "'+orgbook_corp_infos[bc_reg_corp_num]["home_jurisdiction"]+'"' + "\n"
             wrong_corp_juris.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
-            error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
+            error_cmds += "./manage -e prod requeueOrganization" + cmd_pfx + " " + bare_corp_num(bc_reg_corp_num) + "\n"
 
     # now check if there are corps in orgbook that are *not* in BC Reg database
     for orgbook_corp in orgbook_corp_types:
