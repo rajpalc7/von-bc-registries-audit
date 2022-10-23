@@ -114,7 +114,7 @@ def compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_inf
             wrong_corp_type.append(bc_reg_corp_num)
             error_cmds += "./manage -p bc -e prod deleteTopic " + bc_reg_corp_num + "\n"
             error_cmds += "./manage -e prod requeueOrganization " + bare_corp_num(bc_reg_corp_num) + "\n"
-        elif (orgbook_corp_names[bc_reg_corp_num] != bc_reg_corp_name):
+        elif (orgbook_corp_names[bc_reg_corp_num].strip() != bc_reg_corp_name.strip()):
             # in orgbook but has the wrong corp name in orgbook
             error_msgs += "Corp Name mis-match for: " + bc_reg_corp_num + ' BC Reg: "'+bc_reg_corp_name+'", OrgBook: "'+orgbook_corp_names[bc_reg_corp_num]+'"' + "\n"
             wrong_corp_name.append(bc_reg_corp_num)
