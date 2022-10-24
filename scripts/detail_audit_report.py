@@ -67,7 +67,7 @@ if __name__ == "__main__":
     # do the orgbook/bc reg compare
     wrong_bus_num = compare_bc_reg_orgbook(bc_reg_corp_types, bc_reg_corp_names, bc_reg_corp_infos, orgbook_corp_types, orgbook_corp_names, orgbook_corp_infos, future_corps, USE_LEAR=USE_LEAR)
 
-    if 0 < len(wrong_bus_num):
+    if 0 < len(wrong_bus_num) and not USE_LEAR:
         bn_requeue_sql = """
             WITH rows AS (
                 insert into event_by_corp_filing
