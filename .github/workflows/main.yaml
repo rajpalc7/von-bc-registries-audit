@@ -1,7 +1,8 @@
 name: Build & Test
 on:
   workflow_dispatch:
-  # push:
+  push:
+  
 jobs:
   build:
     # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
