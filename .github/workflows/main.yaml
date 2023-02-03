@@ -1,6 +1,6 @@
-# name: Build & Test
-# on:
-#   workflow_dispatch:
+name: Build & Test
+on:
+  workflow_dispatch:
   # push:
 
 # env:
@@ -58,4 +58,3 @@ jobs:
           cmd: |
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
-            
