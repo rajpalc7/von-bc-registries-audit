@@ -20,4 +20,4 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN}}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
+            'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'/
