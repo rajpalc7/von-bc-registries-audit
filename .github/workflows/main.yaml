@@ -22,12 +22,7 @@ jobs:
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
-name: Build and Deploy to OpenShift
-on: 
-  push:
-  jobs:
-    run:
-      env:
+      Deploy:
         HTTPS_PROXY: "${{ secrets.PROXY }}"
         HTTP_PROXY: "${{ secrets.PROXY }}"
       runs-on: ubuntu-latest
