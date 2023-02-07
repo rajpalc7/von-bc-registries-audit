@@ -22,27 +22,18 @@ jobs:
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
-  jobs:
-    name: TEST Deployments
-    environment: test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        name: [openshift]
-        include:
-          - name: openshift
-            file: openshift/openshift.deploy.yml
-            overwrite: true
+  name: Deployment
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      url: https://github.com/bcgov/von-bc-registries-audit
     steps:
-      - uses: redhat-developer/openshift-actions@v2.0
-        with:
-          file: ${{ matrix.file }}
-          openshift_namespace_url: ${{ secrets.OPENSHIFT_NAMESPACE }}
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token_url: ${{ secrets.OPENSHIFT_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          parameters:
-            -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            -p NAME=${{ github.event.repository.name }} ${{ matrix.parameters }}
-          penetration_test: true
+      - name: deploy
