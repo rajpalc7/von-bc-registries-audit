@@ -1,3 +1,8 @@
+name: Build & Test
+on:
+  workflow_dispatch:
+  push:
+
 jobs:
   build:
     # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -16,6 +21,7 @@ jobs:
           cmd: |
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
+
 
 
   # deploys-test:
