@@ -22,24 +22,24 @@ jobs:
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
-name: Example workflow for Openshift Action
-on: [push]
-jobs:
-  run:
-    env:
-      HTTPS_PROXY: "${{ secrets.PROXY }}"
-      HTTP_PROXY: "${{ secrets.PROXY }}"
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: OpenShift Action
-      uses: redhat-developer/openshift-actions@v1.1
-      with:
-        version: 'latest'
-        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER_URL }}
-        parameters: '{"apitoken": "${{ secrets.API_TOKEN }}", "acceptUntrustedCerts": "true"}'
-        cmd: |
-          'version'
-          'new-project my-project'
+  name: Example workflow for Openshift Action
+  on: [push]
+  jobs:
+    run:
+      env:
+        HTTPS_PROXY: "${{ secrets.PROXY }}"
+        HTTP_PROXY: "${{ secrets.PROXY }}"
+      runs-on: macos-latest
+      steps:
+      - uses: actions/checkout@v2.0
+      - name: OpenShift Action
+        uses: redhat-developer/openshift-actions@v2.0
+        with:
+          version: 'latest'
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER_URL }}
+          parameters: '{"apitoken": "${{ secrets.API_TOKEN }}", "acceptUntrustedCerts": "true"}'
+          cmd: |
+            'version'
+            'new-project my-project'
 
 
