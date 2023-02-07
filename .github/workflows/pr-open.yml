@@ -1,0 +1,24 @@
+name: Pull Request
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  builds:
+    permissions:
+      packages: write
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Builds
+        uses: bcgov-nr/action-conditional-container-builder@v1.0.0
+        with:
+          package: docker
+          tag: ${{ github.event.number }}
+          # tag_fallback: test
+          token: ${{ secrets.GITHUB_TOKEN }}
+          triggers: ('docker/')
