@@ -23,7 +23,8 @@ jobs:
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
 name: Build and Deploy to OpenShift
-on: [push]
+on: 
+  push:
   jobs:
     run:
       env:
