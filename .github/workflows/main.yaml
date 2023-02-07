@@ -22,7 +22,7 @@ jobs:
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
-deploys-test:
+  jobs:
     name: TEST Deployments
     environment: test
     runs-on: ubuntu-latest
