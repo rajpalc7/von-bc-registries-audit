@@ -22,8 +22,8 @@ jobs:
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
-  name: Example workflow for Openshift Action
-  on: [push]
+name: Build and Deploy to OpenShift
+on: [push]
   jobs:
     run:
       env:
