@@ -41,7 +41,7 @@ jobs:
           file: ${{ matrix.file }}
           version: ${{ secrets.OPENSHIFT_NAMESPACE }}
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          version: ${{ secrets.OPENSHIFT_TOKEN }}
+          cmd: ${{ secrets.OPENSHIFT_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           parameters:
             -p ZONE=test -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
