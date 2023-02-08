@@ -36,6 +36,6 @@ jobs:
           cmd: |
             'version'
             'oc -n ${NAMESPACE} tag ${BUILD_NAME}:latest ${BUILD_NAME}:dev'
-            'oc rollout latest'
+
 
 
