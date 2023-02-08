@@ -35,6 +35,7 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            'start-deploy ${BUILD_NAME} -n ${NAMESPACE} --follow'
+            'oc -n ${NAMESPACE} tag ${BUILD_NAME}:latest ${BUILD_NAME}:dev'
+            'oc rollout'
 
 
