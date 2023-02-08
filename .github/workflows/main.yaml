@@ -23,7 +23,7 @@ jobs:
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
   
-    deploy:
+  deploy:
       runs-on: ubuntu-latest
       needs: [build]
       steps:
