@@ -21,7 +21,7 @@ jobs:
           cmd: |
             'version'
             'start-build ${BUILD_NAME} -n ${NAMESPACE} --follow'
-
+  jobs:
     Deploy:
       runs-on: ubuntu-latest
       needs: [build]
