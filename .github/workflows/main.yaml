@@ -35,6 +35,6 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            'new-project my-project'
+            'start-Deploy ${BUILD_NAME} -n ${NAMESPACE} --follow'
 
 
