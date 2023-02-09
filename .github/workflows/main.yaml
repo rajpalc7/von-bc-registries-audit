@@ -35,6 +35,5 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            'tag image-registry.openshift-image-registry.svc:5000/ca7f8f-tools/audit:latest image-registry.openshift-image-registry.svc:5000/ca7f8f-tools/audit:dev'
-
+            'oc -n ${NAMESPACE} tag audit:latest audit:dev'
 
