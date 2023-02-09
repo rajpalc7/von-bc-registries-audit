@@ -37,3 +37,16 @@ jobs:
             'version'
             '-n ca7f8f-tools tag audit:latest audit:dev'
 
+deploy test:
+      runs-on: ubuntu-latest
+      needs: [deploy]
+      steps:
+       - name: Dependant is running
+         uses: redhat-developer/openshift-actions@v2.0
+         with:
+          version: 'latest'
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
+          cmd: |
+            'version'
+            '-n ca7f8f-tools tag audit:latest audit:test'
