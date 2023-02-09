@@ -37,7 +37,7 @@ jobs:
             'version'
             '-n ca7f8f-tools tag audit:latest audit:dev'
 
-deploy test:
+  deploy test:
       runs-on: ubuntu-latest
       needs: [deploy]
       steps:
