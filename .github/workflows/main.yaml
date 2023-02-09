@@ -35,5 +35,5 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            '-n ${NAMESPACE} tag audit:latest audit:dev'
+            '-n ca7f8f-tools tag audit:latest audit:dev'
 
