@@ -79,6 +79,12 @@ def config(db_name):
         db['database'] = os.environ.get('ORGBOOK_DB_DATABASE', 'THE_ORG_BOOK')
         db['user'] = os.environ.get('ORGBOOK_DB_USER', 'DB_USER')
         db['password'] = os.environ.get('ORGBOOK_DB_PASSWORD', 'DB_PASSWORD')
+    elif db_name == 'orgbook_wallet':
+        db['host'] = os.environ.get('ORGBOOK_WALLET_DB_HOST', 'localhost')
+        db['port'] = os.environ.get('ORGBOOK_WALLET_DB_PORT', '5433')
+        db['database'] = os.environ.get('ORGBOOK_WALLET_DB_DATABASE', 'icat_agent_wallet')
+        db['user'] = os.environ.get('ORGBOOK_WALLET_DB_USER', 'DB_USER')
+        db['password'] = os.environ.get('ORGBOOK_WALLET_DB_PASSWORD', 'DB_PASSWORD')
     else:
         raise Exception('Section {0} not a valid database'.format(db_name))
  
@@ -97,6 +103,20 @@ def get_connection(db_name, readonly: bool = True):
     db_config = config(db_name)
     conn = psycopg2.connect(**db_config)
     conn.set_session(readonly=readonly)
+    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED)
+    db_conns[db_cache_name] = conn
+
+    return conn
+
+
+# get (shared) connection to database
+def get_rw_connection(db_name, readonly: bool = True):
+    db_cache_name = db_name + "::" + str(readonly)
+    if db_cache_name in db_conns and db_conns[db_cache_name]:
+        return db_conns[db_cache_name]
+
+    db_config = config(db_name)
+    conn = psycopg2.connect(**db_config)
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_READ_COMMITTED)
     db_conns[db_cache_name] = conn
 
