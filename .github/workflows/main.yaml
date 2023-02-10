@@ -4,16 +4,17 @@ on:
   workflow_dispatch:
   push:
 
+env:
+  NAMESPACE: ca7f8f-tools
+  BUILD_NAME: audit
+  IMAGE_NAME: audit
+
 jobs:
   build:
     # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Image Build
-        env:
-          NAMESPACE: ca7f8f-tools
-          BUILD_NAME: audit
-          IMAGE_NAME: audit
         uses: redhat-developer/openshift-actions@v2.0
         with:
           version: "latest"
@@ -35,7 +36,7 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            '-n ca7f8f-tools tag audit:latest audit:dev'
+            '-n ${NAMESPACE} tag audit:latest audit:dev'
 
   test:
       runs-on: ubuntu-latest
@@ -49,4 +50,4 @@ jobs:
           parameters: '{"apitoken": "${{ secrets.OPENSHIFT_TOKEN }}", "acceptUntrustedCerts": "true"}'
           cmd: |
             'version'
-            '-n ca7f8f-tools tag audit:latest audit:test'
+            '-n ${NAMESPACE} tag audit:latest audit:test'
