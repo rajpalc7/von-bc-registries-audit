@@ -142,6 +142,7 @@ if __name__ == "__main__":
 
                     # delete the pres req item record
                     cur.execute(sql_del_items + ids)
+                    cur.execute("commit")
 
                     deleted_count += batch_count
                     cur.close()
