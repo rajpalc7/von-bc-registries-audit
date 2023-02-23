@@ -1,5 +1,5 @@
 kind: Template
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 metadata:
   name: ${NAME}${SUFFIX}-deployment-template
 objects:
@@ -44,6 +44,12 @@ objects:
       ${ORGBOOK_DB_DATABASE_KEY_NAME}: ${ORGBOOK_DB_DATABASE}
       ${ORGBOOK_DB_USER_KEY_NAME}: ${ORGBOOK_DB_USER}
       ${ORGBOOK_DB_PASSWORD_KEY_NAME}: ${ORGBOOK_DB_PASSWORD}
+
+      ${ORGBOOK_WALLET_DB_HOST_KEY_NAME}: ${ORGBOOK_WALLET_DB_HOST}
+      ${ORGBOOK_WALLET_DB_PORT_KEY_NAME}: ${ORGBOOK_WALLET_DB_PORT}
+      ${ORGBOOK_WALLET_DB_DATABASE_KEY_NAME}: ${ORGBOOK_WALLET_DB_DATABASE}
+      ${ORGBOOK_WALLET_DB_USER_KEY_NAME}: ${ORGBOOK_WALLET_DB_USER}
+      ${ORGBOOK_WALLET_DB_PASSWORD_KEY_NAME}: ${ORGBOOK_WALLET_DB_PASSWORD}
     type: Opaque
 
   - kind: DeploymentConfig
@@ -214,6 +220,32 @@ objects:
                     secretKeyRef:
                       name: ${NAME}${SUFFIX}
                       key: ${ORGBOOK_DB_PASSWORD_KEY_NAME}
+
+                - name: ORGBOOK_WALLET_DB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_WALLET_DB_HOST_KEY_NAME}
+                - name: ORGBOOK_WALLET_DB_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_WALLET_DB_PORT_KEY_NAME}
+                - name: ORGBOOK_WALLET_DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_WALLET_DB_DATABASE_KEY_NAME}
+                - name: ORGBOOK_WALLET_DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_WALLET_DB_USER_KEY_NAME}
+                - name: ORGBOOK_WALLET_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}${SUFFIX}
+                      key: ${ORGBOOK_WALLET_DB_PASSWORD_KEY_NAME}
 
                 - name: WEBHOOK_URL
                   valueFrom:
@@ -406,6 +438,32 @@ parameters:
     required: true
     value: orgbook-db-password
 
+  - name: ORGBOOK_WALLET_DB_HOST_KEY_NAME
+    displayName: ORGBOOK_WALLET_DB_HOST_KEY_NAME
+    description: ORGBOOK_WALLET_DB_HOST_KEY_NAME
+    required: true
+    value: orgbook-wallet-db-host
+  - name: ORGBOOK_WALLET_DB_PORT_KEY_NAME
+    displayName: ORGBOOK_WALLET_DB_PORT_KEY_NAME
+    description: ORGBOOK_WALLET_DB_PORT_KEY_NAME
+    required: true
+    value: orgbook-wallet-db-port
+  - name: ORGBOOK_WALLET_DB_DATABASE_KEY_NAME
+    displayName: ORGBOOK_WALLET_DB_DATABASE_KEY_NAME
+    description: ORGBOOK_WALLET_DB_DATABASE_KEY_NAME
+    required: true
+    value: orgbook-wallet-db-database
+  - name: ORGBOOK_WALLET_DB_USER_KEY_NAME
+    displayName: ORGBOOK_WALLET_DB_USER_KEY_NAME
+    description: ORGBOOK_WALLET_DB_USER_KEY_NAME
+    required: true
+    value: orgbook-wallet-db-user
+  - name: ORGBOOK_WALLET_DB_PASSWORD_KEY_NAME
+    displayName: ORGBOOK_WALLET_DB_PASSWORD_KEY_NAME
+    description: ORGBOOK_WALLET_DB_PASSWORD_KEY_NAME
+    required: true
+    value: orgbook-wallet-db-password
+
   - name: BC_REG_DB_HOST
     displayName: BC_REG_DB_HOST
     description: BC_REG_DB_HOST
@@ -512,6 +570,32 @@ parameters:
   - name: ORGBOOK_DB_PASSWORD
     displayName: ORGBOOK_DB_PASSWORD
     description: ORGBOOK_DB_PASSWORD
+    required: true
+    value:
+
+  - name: ORGBOOK_WALLET_DB_HOST
+    displayName: ORGBOOK_WALLET_DB_HOST
+    description: ORGBOOK_WALLET_DB_HOST
+    required: true
+    value:
+  - name: ORGBOOK_WALLET_DB_PORT
+    displayName: ORGBOOK_WALLET_DB_PORT
+    description: ORGBOOK_WALLET_DB_PORT
+    required: true
+    value:
+  - name: ORGBOOK_WALLET_DB_DATABASE
+    displayName: ORGBOOK_WALLET_DB_DATABASE
+    description: ORGBOOK_WALLET_DB_DATABASE
+    required: true
+    value:
+  - name: ORGBOOK_WALLET_DB_USER
+    displayName: ORGBOOK_WALLET_DB_USER
+    description: ORGBOOK_WALLET_DB_USER
+    required: true
+    value:
+  - name: ORGBOOK_WALLET_DB_PASSWORD
+    displayName: ORGBOOK_WALLET_DB_PASSWORD
+    description: ORGBOOK_WALLET_DB_PASSWORD
     required: true
     value:
 
