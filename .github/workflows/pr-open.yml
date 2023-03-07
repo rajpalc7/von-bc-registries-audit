@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Builds
-        uses: bcgov-nr/action-conditional-container-builder@v1.0.0
+        uses: bcgov-nr/action-conditional-container-builder@v1.1.0
         with:
           package: docker
           build_context: .
