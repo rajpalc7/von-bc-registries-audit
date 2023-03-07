@@ -19,7 +19,7 @@ jobs:
         with:
           package: docker
           build_context: .
-          docker_file: docker/dockerfile
+          build_file: docker/dockerfile
           tag: ${{ github.event.number }}
           # tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
