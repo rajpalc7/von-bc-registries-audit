@@ -13,13 +13,13 @@ jobs:
       packages: write
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Builds
         uses: bcgov-nr/action-conditional-container-builder@v1.0.0
         with:
           package: docker
           build_context: .
-          build_file: docker/dockerfile
+          build_file: docker/Dockerfile
           tag: ${{ github.event.number }}
           # tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
