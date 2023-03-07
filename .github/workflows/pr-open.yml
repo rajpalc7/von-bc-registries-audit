@@ -13,7 +13,7 @@ jobs:
       packages: write
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - name: Builds
         uses: bcgov-nr/action-conditional-container-builder@v1.0.0
         with:
