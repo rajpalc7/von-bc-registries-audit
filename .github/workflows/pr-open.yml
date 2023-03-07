@@ -17,10 +17,10 @@ jobs:
       - name: Builds
         uses: bcgov-nr/action-conditional-container-builder@v1.1.0
         with:
-          package: docker
+          package: audit
           build_context: .
           build_file: docker/Dockerfile
-          tag: ${{ github.event.number }}
+          tag: latest
           # tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ('docker/')
