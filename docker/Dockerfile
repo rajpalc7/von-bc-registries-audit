@@ -2,7 +2,7 @@ FROM registry.access.redhat.com/ubi8/python-39:latest
 
 # Change timezone to PST for convenience
 ENV TZ=PST8PDT
-ENV FOO=test2
+ENV FOO=test3
 
 # ========================================================================================================
 # Install go-crond (from https://github.com/webdevops/go-crond)
