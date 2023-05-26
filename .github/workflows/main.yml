@@ -17,6 +17,7 @@ jobs:
       - name: Builds
         uses: bcgov-nr/action-conditional-container-builder@v1.1.1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           package: audit
           build_context: .
           build_file: docker/Dockerfile
