@@ -35,8 +35,8 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}
-          target: sha-${{ github.sha }}
+          target: latest
           tags: |
             dev
-            latest
+            
 
