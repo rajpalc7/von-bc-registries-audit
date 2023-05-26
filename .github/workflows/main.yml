@@ -34,7 +34,7 @@ jobs:
         uses: shrink/actions-docker-registry-tag@v3
         with:
           registry: ghcr.io
-          repository: ${{ github.repository }}
+          repository: ${{ github.repository }}/audit
           target: latest
           tags: |
             dev
