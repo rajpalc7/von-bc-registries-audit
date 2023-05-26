@@ -33,3 +33,4 @@ jobs:
       - name: Add dev tag
         run: |
           docker tag von-bc-registries-audit/audit:latest von-bc-registries-audit/audit:dev
+          
