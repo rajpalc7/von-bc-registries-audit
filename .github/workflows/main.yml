@@ -21,6 +21,6 @@ jobs:
           build_context: .
           build_file: docker/Dockerfile
           tag: latest
-          tag_fallback: test
+          #tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ('docker/')
