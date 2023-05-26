@@ -23,9 +23,13 @@ jobs:
           build_file: docker/Dockerfile
           tag: latest
 
-      - name: Add Dev Tag 
-        env: 
-         TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker login -u github -p $TOKEN
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io 
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
          
+      - name: Add dev tag
+        run: |
+          docker tag von-bc-registries-audit/audit:latest von-bc-registries-audit/audit:dev
