@@ -17,7 +17,6 @@ jobs:
       - name: Builds
         uses: bcgov-nr/action-conditional-container-builder@v1.1.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           package: audit
           build_context: .
           build_file: docker/Dockerfile
@@ -31,20 +30,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
          
       - name: Add dev tag
-        uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/audit
-          target: latest
-          tags: |
-            dev
-            
-      - name: Add test tag
-        uses: shrink/actions-docker-registry-tag@v3
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/audit
-          target: dev
-          tags: |
-            test
+        run: |
+          docker tag von-bc-registries-audit/audit:latest von-bc-registries-audit/audit:dev
+
+          
 
