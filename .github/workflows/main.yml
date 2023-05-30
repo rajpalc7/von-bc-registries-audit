@@ -14,24 +14,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+
       - name: Builds
         uses: bcgov-nr/action-conditional-container-builder@v1.1.1
         with:
           package: audit
           build_context: .
           build_file: docker/Dockerfile
-          tag: latest
-
-      - name: Docker login
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io 
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-         
-      - name: Add dev tag
-        run: |
-          docker tag von-bc-registries-audit/audit:latest von-bc-registries-audit/audit:dev
-
-          
+          tag: latest          
 
