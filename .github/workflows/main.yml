@@ -40,3 +40,13 @@ jobs:
           target: latest
           tags: |
             dev
+
+       - name: "Docker tag and push image"
+          run: |
+            oc -n ca7f8f-dev rollout latest dc/audit; oc -n ca7f8f-dev rollout status dc/audit --watch
+            docker pull ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+            docker tag ghcr.io/bcgov/von-bc-registries-audit/audit:dev image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+            docker login image-registry.apps.silver.devops.gov.bc.ca -u $(oc whoami) -p $(oc whoami -t)
+            docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+  # docker tag prime-webapi-backend ${{secrets.OPENSHIFT_IMAGE_REPOSITORY}}/${{secrets.OPENSHIFT_LICENSE_PLATE}}-tools/prime-webapi-backend:dev
+  # docker push ${{secrets.OPENSHIFT_IMAGE_REPOSITORY}}/${{secrets.OPENSHIFT_LICENSE_PLATE}}-tools/prime-webapi-backend:dev
