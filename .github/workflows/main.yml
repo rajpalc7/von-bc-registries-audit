@@ -21,5 +21,6 @@ jobs:
           package: audit
           build_context: .
           build_file: docker/Dockerfile
-          tag: latest          
-
+          tag: latest 
+          token: ${{ secrets.GITHUB_TOKEN }}
+          triggers: ('docker/')
