@@ -44,7 +44,7 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/audit
-          target: latest
+          target: dev
           tags: |
             test
 
