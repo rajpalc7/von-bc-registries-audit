@@ -24,3 +24,10 @@ jobs:
           tag: latest 
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ('docker/')
+          
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io 
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
