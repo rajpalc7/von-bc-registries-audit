@@ -46,8 +46,8 @@ jobs:
       id: push-to-quay
       uses: redhat-actions/push-to-registry@v2
       with:
-      image: ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-      tags: ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-      registry: image-registry.apps.silver.devops.gov.bc.ca
-      username: rajpalc7@github
-      password: sha256~ij7Bqqpk38tgGUiEPub-yg8JMbiBsoi3FnzurDx_ljI
+        image:  ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+        tags: ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+        registry: image-registry.apps.silver.devops.gov.bc.ca
+        username: rajpalc7@github
+        password: sha256~ij7Bqqpk38tgGUiEPub-yg8JMbiBsoi3FnzurDx_ljI
