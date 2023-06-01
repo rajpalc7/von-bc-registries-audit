@@ -83,7 +83,7 @@ jobs:
       shell: bash
       id: lowercase
       run: |
-        TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest | tr '[:upper:]' '[:lower:]' )
+        TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
         echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
     - name: Build and push Docker image
