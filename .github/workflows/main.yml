@@ -113,13 +113,13 @@ jobs:
     - name: Setup Openshift CLI
       uses: redhat-actions/oc-login@v1
       with: 
-        openshift_server_url: ${{env.OPENSHIFT_SERVER_URL}}
+        openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
         openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
 
     - name: Trigger Openshift
       run: |
-       oc project ${{env.NAMESPACE}} 
-       oc -n ${{env.NAMESPACE}} rollout latest dc/audit; oc -n ${{env.NAMESPACE}} rollout status dc/audit --watch
+       oc project ${{vars.NAMESPACE}} 
+       oc -n ${{vars.NAMESPACE}} rollout latest dc/audit; oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
 
     # - name: Push To quay.io
     #   id: push-to-quay
