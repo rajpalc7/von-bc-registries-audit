@@ -1,53 +1,89 @@
-name: Pull Request
-on:
-  workflow_dispatch:
-  pull_request:
+# name: Pull Request
+# on:
+#   workflow_dispatch:
+#   pull_request:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
+
+# jobs:
+#   builds:
+#     permissions:
+#       packages: write
+#     runs-on: ubuntu-22.04
+    
+#     steps:
+#     - uses: actions/checkout@v3
+
+#     - name: Builds
+#       uses: bcgov-nr/action-conditional-container-builder@v1.1.1
+#       with:
+#         package: audit
+#         build_context: .
+#         build_file: docker/Dockerfile
+#         tag: latest 
+#         token: ${{ secrets.GITHUB_TOKEN }}
+#         triggers: ('docker/')
+          
+#     - name: Docker login
+#       uses: docker/login-action@v2
+#       with:
+#         registry: ghcr.io 
+#         username: ${{ github.actor }}
+#         password: ${{ secrets.GITHUB_TOKEN }}
+
+#     - name: Add dev tag
+#       uses: shrink/actions-docker-registry-tag@v3
+#       with:
+#         registry: ghcr.io
+#         repository: ${{ github.repository }}/audit
+#         target: latest
+#         tags: |
+#           dev
+    
+#     - name: Push images
+#       run: |
+#         docker pull ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+#         docker tag ghcr.io/bcgov/von-bc-registries-audit/audit:dev image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+#         docker login image-registry.apps.silver.devops.gov.bc.ca -u $(oc whoami) -p $(oc whoami -t)
+#         docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+
+
+
+name: Openshift Deployment
+on:
+ push:
+  branches:
+    -main
 
 jobs:
-  builds:
-    permissions:
-      packages: write
+  deploy:
     runs-on: ubuntu-22.04
-    
+
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: action/checkout@v2
 
-    - name: Builds
-      uses: bcgov-nr/action-conditional-container-builder@v1.1.1
-      with:
-        package: audit
-        build_context: .
-        build_file: docker/Dockerfile
-        tag: latest 
-        token: ${{ secrets.GITHUB_TOKEN }}
-        triggers: ('docker/')
-          
-    - name: Docker login
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io 
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build Docker image
+      run: docker build -t my-image:latest
 
-    - name: Add dev tag
-      uses: shrink/actions-docker-registry-tag@v3
-      with:
-        registry: ghcr.io
-        repository: ${{ github.repository }}/audit
-        target: latest
-        tags: |
-          dev
-    
-    - name: Push images
+    - name: Login to Docker registry
+      run: echo "$${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --passowrd-stdin
+
+    - name: Push Docker image to GHCR
+      run: docker push ghce.io/${{github.repository_owner}}/my-image:latest
+
+    - name: Setup Openshift CLI
+      uses: redhat-actions/oc-login@v1
+      with: 
+        openshift_server_url: https://api.silver.devops.gov.bc.ca:6443
+        openshift_token: sha256~Qx1utaPeprz85Ye1sURqy52sIFNmZjTRJiLoH9vW08U
+
+    - name: Trigger Openshift
       run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit:dev image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
-        docker login image-registry.apps.silver.devops.gov.bc.ca -u $(oc whoami) -p $(oc whoami -t)
-        docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+       oc project ca7f8f-dev
+       oc rollout latest latest dc/audit
 
 
 
