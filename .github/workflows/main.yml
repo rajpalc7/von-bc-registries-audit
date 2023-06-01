@@ -49,6 +49,8 @@ jobs:
         docker login image-registry.apps.silver.devops.gov.bc.ca -u $(oc whoami) -p $(oc whoami -t)
         docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
 
+        
+
     # - name: Push To quay.io
     #   id: push-to-quay
     #   uses: redhat-actions/push-to-registry@v2
