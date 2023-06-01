@@ -125,7 +125,7 @@ jobs:
         openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
     - name: login in to Container Registry
       run: |
-        oc login registry
+        oc registry login
     - name: tagging the image
       run: |
         docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.output.image_digest}}
