@@ -65,7 +65,9 @@ jobs:
     permissions:
       packages: write
     runs-on: ubuntu-22.04
-    
+    outputs:
+      image_digest: ${{steps.docker_build.outputs.digest}}
+
     steps:
     - uses: actions/checkout@v3
 
@@ -109,17 +111,32 @@ jobs:
     runs-on: ubuntu-22.04
     environment: dev
     steps:    
-
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
     - name: Setup Openshift CLI
       uses: redhat-actions/oc-login@v1
       with: 
         openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
         openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
+    - name: login in to Container Registry
+      run: |
+        oc login registry
+    - name: tagging the image
+      run: |
+        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.output.image_digest}}
+        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.output.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev  
 
     - name: Trigger Openshift
       run: |
        oc project ${{vars.NAMESPACE}} 
+       oc login registry
        oc -n ${{vars.NAMESPACE}} rollout latest dc/audit; oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
+       
 
     # - name: Push To quay.io
     #   id: push-to-quay
