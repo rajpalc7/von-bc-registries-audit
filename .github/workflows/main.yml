@@ -106,8 +106,6 @@ jobs:
        oc project ca7f8f-dev
        oc -n ca7f8f-dev rollout latest dc/audit; oc -n ca7f8f-dev rollout status dc/audit --watch
 
-
-
     # - name: Push To quay.io
     #   id: push-to-quay
     #   uses: redhat-actions/push-to-registry@v2
