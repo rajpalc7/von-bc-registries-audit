@@ -102,6 +102,7 @@ jobs:
         echo 'digest=${{steps.docker_build.outputs.digest}}'
 
   deploy2dev:
+    needs: builds
     permissions:
       packages: read
     runs-on: ubuntu-22.04
