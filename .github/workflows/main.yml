@@ -104,7 +104,7 @@ jobs:
     - name: Trigger Openshift
       run: |
        oc project ca7f8f-dev
-       oc rollout latest latest dc/audit
+       oc -n ca7f8f-dev rollout latest dc/audit; oc -n ca7f8f-dev rollout status dc/audit --watch
 
 
 
