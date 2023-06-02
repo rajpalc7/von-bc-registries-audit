@@ -134,8 +134,8 @@ jobs:
     - name: Trigger Openshift
       run: |
        oc project ${{vars.NAMESPACE}} 
-       oc login registry
-       oc -n ${{vars.NAMESPACE}} rollout latest dc/audit; oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
+       oc -n ${{vars.NAMESPACE}} rollout latest dc/audit
+       oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
        
 
     # - name: Push To quay.io
