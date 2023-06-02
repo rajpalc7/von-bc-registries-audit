@@ -152,7 +152,7 @@ jobs:
         channel: '#test-gha'
         url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
         commit: true
-        token: ${{ secrets.GITHUB_ROCKET_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     # - name: Push To quay.io
     #   id: push-to-quay
