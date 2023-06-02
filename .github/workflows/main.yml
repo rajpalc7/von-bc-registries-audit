@@ -123,6 +123,7 @@ jobs:
       with: 
         openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
         openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
+        
     - name: login in to Container Registry
       run: |
         oc registry login
