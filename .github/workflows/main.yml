@@ -95,7 +95,10 @@ jobs:
         context: .
         file: docker/Dockerfile
         push: true
-        tags: ${{ steps.lowercase.outputs.tags }} #add additional tag
+        # tags: ${{ steps.lowercase.outputs.tags }} #add additional tag
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -128,12 +131,6 @@ jobs:
       run: |
         oc registry login
 
-    - name: tag the image to latest
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-      with:
-        context: .
-        push: true
-        tags: latest
       # you actually tag the image as dev first and then pull the dev image and then push that to openshift
       # (so you know the latest image all the time) 
 
