@@ -183,7 +183,7 @@ jobs:
     - name: tagging the image
       run: |
         docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev  
+        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test 
         docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test
 
     - name: Trigger Openshift
