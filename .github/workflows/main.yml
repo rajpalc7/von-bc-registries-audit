@@ -96,7 +96,6 @@ jobs:
         file: docker/Dockerfile
         push: true
         tags: ${{ steps.lowercase.outputs.tags }} #add additional tag
-        # tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
