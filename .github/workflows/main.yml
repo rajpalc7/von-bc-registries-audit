@@ -142,7 +142,8 @@ jobs:
        oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
     
     - name: Rocket.Chat Notification
-      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      # uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      uses: actions/checkout@master
       if: always()
       with:
         type: ${{ job.status }}
@@ -189,7 +190,8 @@ jobs:
         oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
     
     - name: Rocket.Chat Notification
-      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      # uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      uses: actions/checkout@master
       if: always()
       with:
         type: ${{ job.status }}
@@ -236,7 +238,8 @@ jobs:
         oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
     
     - name: Rocket.Chat Notification
-      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      # uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+      uses: actions/checkout@master
       if: always()
       with:
         type: ${{ job.status }}
