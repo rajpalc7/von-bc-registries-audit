@@ -148,9 +148,12 @@ jobs:
         fi
         # Always include 'latest' tag.
         TAGS="$TAGS,${DOCKER_IMAGE}:latest"
-        echo ::set-output name=version::${VERSION}
-        echo ::set-output name=tags::${TAGS}
+        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        # echo ::set-output name=version::${VERSION}
+        # echo ::set-output name=tags::${TAGS}
+
 
     - name: tagging the image
       run: |
