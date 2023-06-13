@@ -93,17 +93,17 @@ jobs:
       with:
         context: .
         file: docker/Dockerfile
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.prep.outputs.tags }}
-        labels: |
-          org.opencontainers.image.source=${{ github.event.repository.html_url }}
-          org.opencontainers.image.created=${{ steps.prep.outputs.created }}
-          org.opencontainers.image.revision=${{ github.sha }}
-        # push: true
-        # tags: ${{ steps.lowercase.outputs.tags }} #add additional tag
-        # labels: ${{ steps.meta.outputs.labels }}
-        # cache-from: type=gha
-        # cache-to: type=gha,mode=max
+        # push: ${{ github.event_name != 'pull_request' }}
+        # tags: ${{ steps.prep.outputs.tags }}
+        # labels: |
+        #   org.opencontainers.image.source=${{ github.event.repository.html_url }}
+        #   org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+        #   org.opencontainers.image.revision=${{ github.sha }}
+        push: true
+        tags: ${{ steps.lowercase.outputs.tags }} #add additional tag
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Show Image
       run: |
