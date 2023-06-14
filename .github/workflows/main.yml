@@ -155,6 +155,11 @@ jobs:
         # echo ::set-output name=version::${VERSION}
         # echo ::set-output name=tags::${TAGS}
 
+    - name: tagging dev image
+      run: |
+        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
+        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:dev  
+        docker push ghcr.io/bcgov/von-bc-registries-audit/audit:dev
 
     - name: tagging the image
       run: |
