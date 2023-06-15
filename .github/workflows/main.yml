@@ -107,7 +107,7 @@ jobs:
   deploy2dev:
     needs: builds
     permissions:
-      packages: [read, write]
+      packages: write
     runs-on: ubuntu-22.04
     environment: dev
     steps:    
