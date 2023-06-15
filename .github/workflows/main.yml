@@ -191,7 +191,7 @@ jobs:
   deploy2test:
     needs: [builds, deploy2dev]
     permissions:
-      packages: read
+      packages: write
     runs-on: ubuntu-22.04
     environment: test
     steps:    
@@ -212,12 +212,17 @@ jobs:
       run: |
         oc registry login
 
+    - name: tagging test image
+      run: |
+        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
+        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:test 
+        docker push ghcr.io/bcgov/von-bc-registries-audit/audit:test
+
     - name: tagging the image
       run: |
         docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
         docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test 
         docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test
-
 
     - name: Trigger Openshift
       run: |
@@ -239,7 +244,7 @@ jobs:
   deploy2prod:
     needs: [builds, deploy2dev, deploy2test]
     permissions:
-      packages: read
+      packages: write
     runs-on: ubuntu-22.04
     environment: prod
     steps:    
@@ -259,6 +264,12 @@ jobs:
     - name: login in to Container Registry
       run: |
         oc registry login
+
+    - name: tagging prod image
+      run: |
+        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
+        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:prod
+        docker push ghcr.io/bcgov/von-bc-registries-audit/audit:prod
 
     - name: tagging the image
       run: |
