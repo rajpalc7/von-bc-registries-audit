@@ -170,7 +170,11 @@ jobs:
     - name: Trigger Openshift
       run: |
        oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
-    
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 16    
+
     - name: Rocket.Chat Notification
       uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
       if: always()
