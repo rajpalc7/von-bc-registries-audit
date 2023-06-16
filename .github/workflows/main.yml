@@ -294,16 +294,6 @@ jobs:
         commit: true
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Push To quay.io
-    #   id: push-to-quay
-    #   uses: redhat-actions/push-to-registry@v2
-    #   with:
-    #     image: ghcr.io/bcgov/von-bc-registries-audit/audit:latest
-    #     tags: ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-    #     registry: image-registry.apps.silver.devops.gov.bc.ca
-    #     username: rajpalc7@github
-    #     password: sha256~ij7Bqqpk38tgGUiEPub-yg8JMbiBsoi3FnzurDx_ljI
-
     # - name: Log in to the Container registry
     #  uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
     #   with:
