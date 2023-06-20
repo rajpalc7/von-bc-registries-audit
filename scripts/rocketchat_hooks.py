@@ -11,6 +11,7 @@ import json
 from email_hooks import email_support
 
 
+# available log levels
 LOG_LEVELS = {
     '0': 'ERROR',
     '1': 'WARNING',
