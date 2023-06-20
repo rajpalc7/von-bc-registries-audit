@@ -169,6 +169,7 @@ jobs:
 
     - name: Trigger Openshift
       run: |
+       echo starting rollout in ${{vars.NAMESPACE}}
        oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
 
     - uses: actions/setup-node@v1
@@ -226,6 +227,7 @@ jobs:
 
     - name: Trigger Openshift
       run: |
+        echo starting rollout in ${{vars.NAMESPACE}}
         oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
     
     - name: Rocket.Chat Notification
@@ -279,6 +281,7 @@ jobs:
 
     - name: Trigger Openshift
       run: |
+        echo starting rollout in ${{vars.NAMESPACE}}
         oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
     
     - name: Rocket.Chat Notification
