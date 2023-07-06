@@ -66,9 +66,9 @@ jobs:
     - name: Display image results
       id: meta
       run: |
-        echo 'imageid=${{steps.docker_build.outputs.imageid}}' >> $GITHUB_OUTPUT
-        echo 'digest=${{steps.docker_build.outputs.digest}}' >> $GITHUB_OUTPUT
-
+        echo 'imageid=${{steps.docker_build.outputs.imageid}}'
+        echo 'digest=${{steps.docker_build.outputs.digest}}'
+        
   # ToDo:
   #   - Define these jobs as a reusable workflow, since the steps are identical.
   deploy2dev:
