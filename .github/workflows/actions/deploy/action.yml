@@ -76,14 +76,14 @@ runs:
           oc -n ${{ inputs.namespace }} rollout status dc/audit --watch
 
       - name: Rocket.Chat Notification
-          uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-          if: always()
-          with:
-            type: ${{ inputs.job_status }}
-            job_name: '*Deployment to Dev*'
-            mention: 'here'
-            mention_if: 'failure'
-            channel: '#test-gha'
-            url: ${{ inputs.rocketchat_webhook }}
-            commit: true
-            token: ${{ inputs.github_token }}
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: always()
+        with:
+          type: ${{ inputs.job_status }}
+          job_name: '*Deployment to Dev*'
+          mention: 'here'
+          mention_if: 'failure'
+          channel: '#test-gha'
+          url: ${{ inputs.rocketchat_webhook }}
+          commit: true
+          token: ${{ inputs.github_token }}
