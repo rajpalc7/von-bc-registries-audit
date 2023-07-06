@@ -84,7 +84,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: deploy to dev
-        uses: ./.github/workflow/actions/deploy
+        uses: ./.github/workflows/actions/deploy
         with:
           environment: dev
           username: ${{ github.actor }}
