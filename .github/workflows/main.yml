@@ -4,8 +4,7 @@ name: Build and Deploy Audit Image
 #   - Limit workflow runs to the main repo so it does not try to run on someone else's fork.
 on:
   workflow_dispatch:
-  pull_request:
-  workflow_call:
+  pull_request: 
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
