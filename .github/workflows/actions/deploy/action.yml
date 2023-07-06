@@ -80,7 +80,7 @@ runs:
         if: always()
         with:
           type: ${{ inputs.job_status }}
-          job_name: '*Deployment to Dev*'
+          job_name: '*Deployment to ${{ inputs.environment }}*'
           mention: 'here'
           mention_if: 'failure'
           channel: '#test-gha'
