@@ -66,9 +66,9 @@ jobs:
     - name: Display image results
       id: meta
       run: |
-        echo 'imageid=${{steps.docker_build.outputs.imageid}}'
-        echo 'digest=${{steps.docker_build.outputs.digest}}'
-        
+        echo 'imageid=${{ steps.docker_build.outputs.imageid }}'
+        echo 'digest=${{ steps.docker_build.outputs.digest }}'
+
   # ToDo:
   #   - Define these jobs as a reusable workflow, since the steps are identical.
   deploy2dev:
@@ -92,7 +92,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          image_digest: ${{ needs.build.outputs.image_diges }}
+          image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-dev
           job_status: ${{ job.status }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
