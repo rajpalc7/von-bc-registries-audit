@@ -139,7 +139,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: deploy to test
+      - name: deploy to prod
         uses: ./.github/workflows/actions/deploy
         with:
           environment: prod
