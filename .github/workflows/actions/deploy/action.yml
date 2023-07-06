@@ -39,15 +39,15 @@ runs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ input.username }}
-          password: ${{ input.password }}
+          username: ${{ inputs.username }}
+          password: ${{ inputs.password }}
 
       - name: Setup Openshift CLI
         uses: redhat-actions/oc-login@v1
         with:
-          environment: ${{ input.environment }}
-          openshift_server_url: ${{ input.openshift_server_url }}
-          openshift_token: ${{ input.openshift_token }}
+          environment: ${{ inputs.environment }}
+          openshift_server_url: ${{ inputs.openshift_server_url }}
+          openshift_token: ${{ inputs.openshift_token }}
 
       - name: login in to OpenShift container registry
         run: |
@@ -55,30 +55,30 @@ runs:
 
       - name: Tag the image in the GHCR as dev
         run: |
-          docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ input.image_digest }}
-          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ input.image_digest }} ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+          docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
+          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} ghcr.io/bcgov/von-bc-registries-audit/audit:dev
           docker push ghcr.io/bcgov/von-bc-registries-audit/audit:dev
 
       - name: Tag the image in the OpenShift container registry as dev
         run: |
-          docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ input.image_digest }}
-          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ input.image_digest }} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+          docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
+          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
           docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
 
       - name: Trigger Openshift
         run: |
-          echo starting rollout in ${{ input.namespace }}
-          oc -n ${{ input.namespace }} rollout status dc/audit --watch
+          echo starting rollout in ${{ inputs.namespace }}
+          oc -n ${{ inputs.namespace }} rollout status dc/audit --watch
 
       - name: Rocket.Chat Notification
           uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
           if: always()
           with:
-            type: ${{ input.job_status }}
+            type: ${{ inputs.job_status }}
             job_name: '*Deployment to Dev*'
             mention: 'here'
             mention_if: 'failure'
             channel: '#test-gha'
-            url: ${{ input.rocketchat_webhook }}
+            url: ${{ inputs.rocketchat_webhook }}
             commit: true
-            token: ${{ input.github_token }}
+            token: ${{ inputs.github_token }}
