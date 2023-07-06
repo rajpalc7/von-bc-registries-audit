@@ -1,91 +1,56 @@
-# name: Pull Request
-# on:
-#   workflow_dispatch:
-#   pull_request:
+name: Build and Deploy Audit Image
 
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
-
-# jobs:
-#   builds:
-#     permissions:
-#       packages: write
-#     runs-on: ubuntu-22.04
-    
-#     steps:
-#     - uses: actions/checkout@v3
-
-#     - name: Builds
-#       uses: bcgov-nr/action-conditional-container-builder@v1.1.1
-#       with:
-#         package: audit
-#         build_context: .
-#         build_file: docker/Dockerfile
-#         tag: latest 
-#         token: ${{ secrets.GITHUB_TOKEN }}
-#         triggers: ('docker/')
-          
-#     - name: Docker login
-#       uses: docker/login-action@v2
-#       with:
-#         registry: ghcr.io 
-#         username: ${{ github.actor }}
-#         password: ${{ secrets.GITHUB_TOKEN }}
-
-#     - name: Add dev tag
-#       uses: shrink/actions-docker-registry-tag@v3
-#       with:
-#         registry: ghcr.io
-#         repository: ${{ github.repository }}/audit
-#         target: latest
-#         tags: |
-#           dev
-    
-#     - name: Push images
-#       run: |
-#         docker pull ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-#         docker tag ghcr.io/bcgov/von-bc-registries-audit/audit:dev image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
-#         docker login image-registry.apps.silver.devops.gov.bc.ca -u $(oc whoami) -p $(oc whoami -t)
-#         docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
-
-
-name: Pull Request
+# ToDo:
+#   - Limit workflow runs to the main repo so it does not try to run on someone else's fork.
 on:
   workflow_dispatch:
   pull_request:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  builds:
+  build:
+    name: Build Image
     permissions:
       packages: write
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       image_digest: ${{steps.docker_build.outputs.digest}}
-
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Log in to the Container registry
+    - name: Log in to the GHCR
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Force lowercase for Docker
+    - name: Define image tags
       shell: bash
       id: lowercase
       run: |
         TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
         echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+    # ToDo:
+    #   - Add the Docker meta step back in for defining the tags and labels
+    #   - Add additional tags.  `latest` for example.
+
+    # This is here as a starter, not as the actual implementation
+    # - name: Extract metadata (tags, labels) for Docker
+    #   id: meta
+    #   uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+    #   with:
+    #     images: ghcr.io/bcgov/von-bc-registries-audit/audit
+    #   tags: |
+    #     <to be defined>
 
     - name: Build and push Docker image
       id: docker_build
@@ -94,228 +59,137 @@ jobs:
         context: .
         file: docker/Dockerfile
         push: true
-        tags: ${{ steps.lowercase.outputs.tags }} #add additional tag
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ steps.lowercase.outputs.tags }} # add additional tags
+        labels: ${{ steps.meta.outputs.labels }}  # add Docker meta step back in
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Show Image
+    - name: Display image results
+      id: meta
       run: |
-        echo 'imageid=${{steps.docker_build.outputs.imageid}}'
-        echo 'digest=${{steps.docker_build.outputs.digest}}'
+        echo 'imageid=${{steps.docker_build.outputs.imageid}}' >> $GITHUB_OUTPUT
+        echo 'digest=${{steps.docker_build.outputs.digest}}' >> $GITHUB_OUTPUT
 
+  # ToDo:
+  #   - Define these jobs as a reusable workflow, since the steps are identical.
   deploy2dev:
-    needs: builds
+    needs: build
     permissions:
       packages: write
-    runs-on: ubuntu-22.04
-    environment: dev
-    steps:    
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
+    runs-on: ubuntu-latest
+
+    # ToDo:
+    #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
+    steps:
+    - name: deploy to dev
+      uses: ./github/workflow/actions/deploy
       with:
-        registry: ghcr.io
+        environment: dev
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Setup Openshift CLI
-      uses: redhat-actions/oc-login@v1
-      with: 
-        openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
-        openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
+        image_digest: ${{ needs.meta.outputs.digest }}
+        namespace: abc123-dev
+        job_status: ${{ job.status }}
+        rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+          
 
-    - name: login in to Container Registry
-      run: |
-        oc registry login
+  # deploy2test:
+  #   needs: [build, deploy2dev]
+  #   permissions:
+  #     packages: write
+  #   runs-on: ubuntu-latest
+  #   environment: test
+  #   steps:
+  #   - name: Log in to the Container registry
+  #     uses: docker/login-action@v2
+  #     with:
+  #       registry: ghcr.io
+  #       username: ${{ github.actor }}
+  #       password: ${{ secrets.GITHUB_TOKEN }}
 
-      # add another job that you actually tag the image as dev first in ghcr and then pull down the dev image and then push that to openshift
-      # (so you know the latest image all the time) 
-    # - name: Prepare labels and tags
-    #   id: prep
-    #   run: |
-    #     DOCKER_IMAGE=ghcr.io/${{ steps.lowercase_repo_owner.outputs.lowercase }}/audit
-    #     VERSION=edge
-    #     if [[ $GITHUB_REF == refs/tags/* ]]; then
-    #       VERSION=${GITHUB_REF#refs/tags/}
-    #     elif [[ $GITHUB_REF == refs/heads/* ]]; then
-    #       VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-    #     elif [[ $GITHUB_REF == refs/pull/* ]]; then
-    #       VERSION=pr-${{ github.event.number }}
-    #     fi
-    #     TAGS="${DOCKER_IMAGE}:${VERSION}"
-    #     if [ "${{ github.event_name }}" = "push" ]; then
-    #       TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
-    #     fi
-    #     # Always include 'latest' tag.
-    #     TAGS="$TAGS,${DOCKER_IMAGE}:latest"
-    #     echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-    #     echo "version=${VERSION}" >> $GITHUB_OUTPUT
-    #     echo "created=${CREATED}" >> $GITHUB_OUTPUT
-    #     # echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-    #     # echo ::set-output name=version::${VERSION}
-    #     # echo ::set-output name=tags::${TAGS}
+  #   - name: Setup Openshift CLI
+  #     uses: redhat-actions/oc-login@v1
+  #     with:
+  #       openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
+  #       openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
 
-    - name: tagging dev image
-      run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:dev  
-        docker push ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+  #   - name: login in to Container Registry
+  #     run: |
+  #       oc registry login
+  #   - name: tagging test image
+  #     run: |
+  #       docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}}
+  #       docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:test
+  #       docker push ghcr.io/bcgov/von-bc-registries-audit/audit:test
+  #   - name: tagging the image
+  #     run: |
+  #       docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}}
+  #       docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test
+  #       docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test
+  #   - name: Trigger Openshift
+  #     run: |
+  #       echo starting rollout in ${{vars.NAMESPACE}}
+  #       oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
+  #   - name: Rocket.Chat Notification
+  #     uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+  #     if: always()
+  #     with:
+  #       type: ${{ job.status }}
+  #       job_name: '*Deployment to Test*'
+  #       mention: 'here'
+  #       mention_if: 'failure'
+  #       channel: '#test-gha'
+  #       url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+  #       commit: true
+  #       token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: tagging the image
-      run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev  
-        docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+  # deploy2prod:
+  #   needs: [build, deploy2dev, deploy2test]
+  #   permissions:
+  #     packages: write
+  #   runs-on: ubuntu-latest
+  #   environment: prod
+  #   steps:
+  #   - name: Log in to the Container registry
+  #     uses: docker/login-action@v2
+  #     with:
+  #       registry: ghcr.io
+  #       username: ${{ github.actor }}
+  #       password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Trigger Openshift
-      run: |
-       echo starting rollout in ${{vars.NAMESPACE}}
-       oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
+  #   - name: Setup Openshift CLI
+  #     uses: redhat-actions/oc-login@v1
+  #     with:
+  #       openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
+  #       openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
 
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 16    
-
-    - name: Rocket.Chat Notification
-      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-      if: always()
-      with:
-        type: ${{ job.status }}
-        job_name: '*Deployment to Dev*'
-        mention: 'here'
-        mention_if: 'failure'
-        channel: '#test-gha'
-        url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-        commit: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy2test:
-    needs: [builds, deploy2dev]
-    permissions:
-      packages: write
-    runs-on: ubuntu-22.04
-    environment: test
-    steps:    
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Setup Openshift CLI
-      uses: redhat-actions/oc-login@v1
-      with: 
-        openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
-        openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
-
-    - name: login in to Container Registry
-      run: |
-        oc registry login
-
-    - name: tagging test image
-      run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:test 
-        docker push ghcr.io/bcgov/von-bc-registries-audit/audit:test
-
-    - name: tagging the image
-      run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test 
-        docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:test
-
-    - name: Trigger Openshift
-      run: |
-        echo starting rollout in ${{vars.NAMESPACE}}
-        oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
-    
-    - name: Rocket.Chat Notification
-      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-      if: always()
-      with:
-        type: ${{ job.status }}
-        job_name: '*Deployment to Test*'
-        mention: 'here'
-        mention_if: 'failure'
-        channel: '#test-gha'
-        url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-        commit: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy2prod:
-    needs: [builds, deploy2dev, deploy2test]
-    permissions:
-      packages: write
-    runs-on: ubuntu-22.04
-    environment: prod
-    steps:    
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Setup Openshift CLI
-      uses: redhat-actions/oc-login@v1
-      with: 
-        openshift_server_url: ${{vars.OPENSHIFT_SERVER_URL}}
-        openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
-
-    - name: login in to Container Registry
-      run: |
-        oc registry login
-
-    - name: tagging prod image
-      run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:prod
-        docker push ghcr.io/bcgov/von-bc-registries-audit/audit:prod
-
-    - name: tagging the image
-      run: |
-        docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}}
-        docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.builds.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:prod 
-        docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:prod
-
-    - name: Trigger Openshift
-      run: |
-        echo starting rollout in ${{vars.NAMESPACE}}
-        oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
-    
-    - name: Rocket.Chat Notification
-      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-      if: always()
-      with:
-        type: ${{ job.status }}
-        job_name: '*Deployment to Prod*'
-        mention: 'here'
-        mention_if: 'failure'
-        channel: '#test-gha'
-        url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-        commit: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    # - name: Log in to the Container registry
-    #  uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-    #   with:
-    #     registry: ghcr.io
-    #     username: rajpalc7@github
-    #     password: sha256~ij7Bqqpk38tgGUiEPub-yg8JMbiBsoi3FnzurDx_ljI
-
-    # - name: Extract metadata (tags, labels) for Docker
-    #   id: meta
-    #   uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-    #   with:
-    #     images: ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-
-    # - name: Build and push Docker image
-    #   uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-    #   with:
-    #     context: .
-    #     push: true
-    #     tags: latest
-
-
-      
+  #   - name: login in to Container Registry
+  #     run: |
+  #       oc registry login
+  #   - name: tagging prod image
+  #     run: |
+  #       docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}}
+  #       docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}} ghcr.io/bcgov/von-bc-registries-audit/audit:prod
+  #       docker push ghcr.io/bcgov/von-bc-registries-audit/audit:prod
+  #   - name: tagging the image
+  #     run: |
+  #       docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}}
+  #       docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{needs.build.outputs.image_digest}} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:prod
+  #       docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:prod
+  #   - name: Trigger Openshift
+  #     run: |
+  #       echo starting rollout in ${{vars.NAMESPACE}}
+  #       oc -n ${{vars.NAMESPACE}} rollout status dc/audit --watch
+  #   - name: Rocket.Chat Notification
+  #     uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+  #     if: always()
+  #     with:
+  #       type: ${{ job.status }}
+  #       job_name: '*Deployment to Prod*'
+  #       mention: 'here'
+  #       mention_if: 'failure'
+  #       channel: '#test-gha'
+  #       url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+  #       commit: true
+  #       token: ${{ secrets.GITHUB_TOKEN }}
