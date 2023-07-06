@@ -100,7 +100,7 @@ jobs:
           
 
   deploy2test:
-    needs: [build, dev]
+    needs: [build, deploy2dev]
     permissions:
       packages: read
     runs-on: ubuntu-latest
