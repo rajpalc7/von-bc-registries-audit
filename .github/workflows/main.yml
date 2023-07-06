@@ -76,6 +76,7 @@ jobs:
     permissions:
       packages: write
     runs-on: ubuntu-latest
+    environment: dev
 
     # ToDo:
     #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
@@ -89,8 +90,8 @@ jobs:
           environment: dev
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          openshift_server_url:  ${{vars.OPENSHIFT_SERVER_URL}}
-          openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.meta.outputs.digest }}
           namespace: ca7f8f-dev
           job_status: ${{ job.status }}
