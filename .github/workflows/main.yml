@@ -81,17 +81,20 @@ jobs:
     # ToDo:
     #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
     steps:
-    - name: deploy to dev
-      uses: ./.github/workflow/actions/deploy
-      with:
-        environment: dev
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        image_digest: ${{ needs.meta.outputs.digest }}
-        namespace: ca7f8f-dev
-        job_status: ${{ job.status }}
-        rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: deploy to dev
+        uses: ./.github/workflow/actions/deploy
+        with:
+          environment: dev
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          image_digest: ${{ needs.meta.outputs.digest }}
+          namespace: ca7f8f-dev
+          job_status: ${{ job.status }}
+          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           
 
   # deploy2test:
