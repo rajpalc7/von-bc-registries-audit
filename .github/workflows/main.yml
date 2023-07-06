@@ -89,6 +89,8 @@ jobs:
           environment: dev
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          openshift_server_url:  ${{vars.OPENSHIFT_SERVER_URL}}
+          openshift_token: ${{secrets.OPENSHIFT_TOKEN}}
           image_digest: ${{ needs.meta.outputs.digest }}
           namespace: ca7f8f-dev
           job_status: ${{ job.status }}
