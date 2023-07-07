@@ -48,7 +48,7 @@ runs:
         with:
           environment: ${{ inputs.environment }}
           openshift_server_url: ${{ inputs.openshift_server_url }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          openshift_token: ${{ inputs.openshift_token }}
 
       - name: login in to OpenShift container registry
         shell: bash
@@ -79,7 +79,7 @@ runs:
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
         if: always()
         with:
-          type: ${{ inputs.job_status }}
+          type:  ${{ job.status }}
           job_name: '*Deployment to ${{ inputs.environment }}*'
           mention: 'here'
           mention_if: 'failure'
