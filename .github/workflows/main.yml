@@ -88,13 +88,13 @@ jobs:
         uses: ./.github/workflows/actions/deploy
         with:
           environment: dev
-          username: ${{ github.actor }}
+          # username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-dev
-          job_status: ${{ job.status }}
+          # job_status: ${{ job.status }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
