@@ -23,9 +23,9 @@ inputs:
   namespace:
     description: namespace where we want to deploy the image
     required: true
-  job_status:
-    description: Notifies status of job in Rocket Chat
-    required: true
+  # job_status:
+  #   description: Notifies status of job in Rocket Chat
+  #   required: true
   rocketchat_webhook:
     description: defining the rocket chat webhook url
     required: true
@@ -40,7 +40,7 @@ runs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ inputs.username }}
+          username: ${{ github.actor }}
           password: ${{ inputs.password }}
 
       - name: Setup Openshift CLI
