@@ -5,9 +5,9 @@ inputs:
   environment:
     description: the environment to deploy to
     required: true
-  username: 
-    description: docker registry username
-    required: true
+  # username: 
+  #   description: docker registry username
+  #   required: true
   password:
     description: docker registry password
     required: true
@@ -47,7 +47,7 @@ runs:
         uses: redhat-actions/oc-login@v1
         with:
           environment: ${{ inputs.environment }}
-          openshift_server_url: ${{ inputs.openshift_server_url }}
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           openshift_token: ${{ inputs.openshift_token }}
 
       - name: login in to OpenShift container registry
