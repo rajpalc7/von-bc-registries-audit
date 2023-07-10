@@ -5,9 +5,6 @@ inputs:
   environment:
     description: the environment to deploy to
     required: true
-  # username: 
-  #   description: docker registry username
-  #   required: true
   password:
     description: docker registry password
     required: true
@@ -23,9 +20,6 @@ inputs:
   namespace:
     description: namespace where we want to deploy the image
     required: true
-  # job_status:
-  #   description: Notifies status of job in Rocket Chat
-  #   required: true
   rocketchat_webhook:
     description: defining the rocket chat webhook url
     required: true
