@@ -88,7 +88,7 @@ jobs:
       - name: deploy to dev
         uses: ./.github/workflows/actions/deploy
         with:
-          environment: dev
+          # environment: dev
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
