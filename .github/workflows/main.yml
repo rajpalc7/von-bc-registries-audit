@@ -77,7 +77,7 @@ jobs:
     permissions:
       packages: write
     runs-on: ubuntu-latest
-    # environment: dev
+    environment: dev
 
     # ToDo:
     #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
