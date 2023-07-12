@@ -5,14 +5,8 @@ inputs:
   environment:
     description: the environment to deploy to
     required: true
-  password:
-    description: docker registry password
-    required: true
   openshift_server_url: 
     description: openshift server url
-    required: true
-  openshift_token:
-    description: openshift server token
     required: true
   image_digest:
     description: openshift image digest
@@ -20,12 +14,25 @@ inputs:
   namespace:
     description: namespace where we want to deploy the image
     required: true
+  ghcr.io/bcgov/von-bc-registries-audit/audit:
+    description: 
+    required: true
+  image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:
+    description:
+    required: true
+secret:
   rocketchat_webhook:
     description: defining the rocket chat webhook url
     required: true
   github_token:
     description: secret token used to webhook github and rocketchat 
-    required: true 
+    required: true
+  password:
+    description: docker registry password
+    required: true
+  openshift_token:
+    description: openshift server token
+    required: true
 
 runs:
     using: composite
