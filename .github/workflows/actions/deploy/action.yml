@@ -23,10 +23,10 @@ on:
       #   description:
       #   required: true
     secrets:
-      rocketchat_webhook:
+      ROCKETCHAT_WEBHOOK:
         description: defining the rocket chat webhook url
         required: true
-      github_token:
+      GITHUB_TOKEN:
         description: secret token used to webhook github and rocketchat 
         required: true
       password:
