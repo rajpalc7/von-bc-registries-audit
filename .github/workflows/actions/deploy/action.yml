@@ -87,6 +87,6 @@ runs:
           mention: 'here'
           mention_if: 'failure'
           channel: '#test-gha'
-          url: ${{ secrets.rocketchat_webhook }}
+          url: ${{ inputs.rocketchat_webhook }}
           commit: true
-          token: ${{ secrets.github_token }}
+          token: ${{ inputs.github_token }}
