@@ -95,7 +95,7 @@ jobs:
           namespace: ca7f8f-dev
           # ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ }}
           # image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ }}
-        secret:
+        secrets:
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}

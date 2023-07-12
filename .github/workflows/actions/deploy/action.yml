@@ -14,13 +14,13 @@ inputs:
   namespace:
     description: namespace where we want to deploy the image
     required: true
-  ghcr.io/bcgov/von-bc-registries-audit/audit:
-    description: 
-    required: true
-  image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:
-    description:
-    required: true
-secret:
+  # ghcr.io/bcgov/von-bc-registries-audit/audit:
+  #   description: 
+  #   required: true
+  # image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:
+  #   description:
+  #   required: true
+secrets:
   rocketchat_webhook:
     description: defining the rocket chat webhook url
     required: true
