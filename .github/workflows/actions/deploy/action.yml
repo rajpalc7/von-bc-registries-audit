@@ -89,4 +89,4 @@ runs:
           channel: '#test-gha'
           url: ${{ inputs.rocketchat_webhook }}
           commit: true
-          token: ${{ secrets.github_token }}
+          token: ${{ inputs.github_token }}
