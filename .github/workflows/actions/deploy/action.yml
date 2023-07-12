@@ -42,14 +42,14 @@ runs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ inputs.github_token }}
+          password: ${{ secrets.github_token }}
 
       - name: Setup Openshift CLI
         uses: redhat-actions/oc-login@v1
         with:
           environment: ${{ inputs.environment }}
           openshift_server_url: ${{ inputs.openshift_server_url }}
-          openshift_token: ${{ inputs.openshift_token }}
+          openshift_token: ${{ secrets.openshift_token }}
 
       - name: login in to OpenShift container registry
         shell: bash
@@ -85,6 +85,6 @@ runs:
           mention: 'here'
           mention_if: 'failure'
           channel: '#test-gha'
-          url: ${{ inputs.rocketchat_webhook }}
+          url: ${{ secrets.rocketchat_webhook }}
           commit: true
-          token: ${{ inputs.github_token }}
+          token: ${{ secrets.github_token }}
