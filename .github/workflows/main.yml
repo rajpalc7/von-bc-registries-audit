@@ -99,7 +99,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ }}
           # image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ }}
-
+          secrets: inherit
+          
   deploy2test:
     needs: [build, deploy2dev]
     permissions:
