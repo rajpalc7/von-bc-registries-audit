@@ -31,7 +31,7 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Define image tags
       shell: bash
@@ -51,6 +51,7 @@ jobs:
     #     images: ghcr.io/bcgov/von-bc-registries-audit/audit
     #   tags: |
     #     <to be defined>
+# define as latest, SHA, dev . It should not be hard coded.
 
     - name: Build and push Docker image
       id: docker_build
@@ -89,7 +90,7 @@ jobs:
         uses: ./.github/workflows/actions/deploy
         with:
           environment: dev
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.build.outputs.image_digest }}

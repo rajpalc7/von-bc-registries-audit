@@ -5,9 +5,9 @@ inputs:
   environment:
     description: the environment to deploy to
     required: true
-  password:
-    description: docker registry password
-    required: true
+  # password:
+  #   description: docker registry password
+  #   required: true
   openshift_server_url: 
     description: openshift server url
     required: true
@@ -35,7 +35,7 @@ runs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ inputs.password }}
+          github_token: ${{ inputs.github_token }}
 
       - name: Setup Openshift CLI
         uses: redhat-actions/oc-login@v1
@@ -49,19 +49,19 @@ runs:
         run: |
           oc registry login
 
-      - name: Tag the image in the GHCR as dev
+      - name: Tag the image in the GHCR as targeted ${{ inputs.environment }}
         shell: bash
         run: |
           docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
-          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} ghcr.io/bcgov/von-bc-registries-audit/audit:dev
-          docker push ghcr.io/bcgov/von-bc-registries-audit/audit:dev
+          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} ghcr.io/bcgov/von-bc-registries-audit/audit:${{ inputs.environment }}
+          docker push ghcr.io/bcgov/von-bc-registries-audit/audit:${{ inputs.environment }}
 
-      - name: Tag the image in the OpenShift container registry as dev
+      - name: Tag the image in the OpenShift container registry as targeted ${{ inputs.environment }}
         shell: bash
         run: |
           docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
-          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
-          docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:dev
+          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:${{ inputs.environment }}
+          docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:${{ inputs.environment }}
 
       - name: Trigger Openshift
         shell: bash
