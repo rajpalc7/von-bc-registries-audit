@@ -5,9 +5,9 @@ inputs:
   environment:
     description: the environment to deploy to
     required: true
-  # password:
-  #   description: docker registry password
-  #   required: true
+  password:
+    description: docker registry password
+    required: true
   openshift_server_url: 
     description: openshift server url
     required: true
@@ -23,9 +23,9 @@ inputs:
   rocketchat_webhook:
     description: defining the rocket chat webhook url
     required: true
-  github_token:
-    description: secret token used to webhook github and rocketchat 
-    required: true 
+  # github_token:
+  #   description: secret token used to webhook github and rocketchat 
+  #   required: true 
 
 runs:
     using: composite
@@ -35,7 +35,7 @@ runs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          github_token: ${{ inputs.github_token }}
+          password: ${{ inputs.github_token }}
 
       - name: Setup Openshift CLI
         uses: redhat-actions/oc-login@v1
