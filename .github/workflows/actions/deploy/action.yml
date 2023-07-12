@@ -23,7 +23,7 @@ inputs:
   rocketchat_webhook:
     description: defining the rocket chat webhook url
     required: true
-  webhook_token:
+  github_token:
     description: secret token used to webhook github and rocketchat 
     required: true 
 
@@ -49,14 +49,14 @@ runs:
         run: |
           oc registry login
 
-      - name: Tag the image in the GHCR as targeted ${{ inputs.environment }}
+      - name: Tag the image in the GHCR as ${{ inputs.environment }}
         shell: bash
         run: |
           docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
           docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} ghcr.io/bcgov/von-bc-registries-audit/audit:${{ inputs.environment }}
           docker push ghcr.io/bcgov/von-bc-registries-audit/audit:${{ inputs.environment }}
 
-      - name: Tag the image in the OpenShift container registry as targeted ${{ inputs.environment }}
+      - name: Tag the image in the OpenShift container registry as ${{ inputs.environment }}
         shell: bash
         run: |
           docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
@@ -80,4 +80,4 @@ runs:
           channel: '#test-gha'
           url: ${{ inputs.rocketchat_webhook }}
           commit: true
-          token: ${{ inputs.webhook_token }}
+          token: ${{ inputs.github_token }}
