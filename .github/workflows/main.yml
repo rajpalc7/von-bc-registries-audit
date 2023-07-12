@@ -96,7 +96,7 @@ jobs:
           image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-dev
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
           
 
   deploy2test:
