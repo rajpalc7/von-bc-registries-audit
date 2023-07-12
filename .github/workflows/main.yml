@@ -90,16 +90,15 @@ jobs:
         uses: ./.github/workflows/actions/deploy
         with:
           environment: dev
+          password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-dev
-          # ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ }}
-          # image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ }}
-        secrets:
-          password: ${{ secrets.GITHUB_TOKEN }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ }}
+          # image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ }}
 
   deploy2test:
     needs: [build, deploy2dev]
@@ -125,8 +124,6 @@ jobs:
           namespace: ca7f8f-test
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ }}
-          image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ }}
 
   deploy2prod:
     needs: [build, deploy2dev, deploy2test]
@@ -152,6 +149,5 @@ jobs:
           namespace: ca7f8f-prod
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ }}
-          image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ }}
+          
 
