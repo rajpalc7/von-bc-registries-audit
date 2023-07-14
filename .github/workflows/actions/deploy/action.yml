@@ -16,12 +16,12 @@ on:
       namespace:
         description: namespace where we want to deploy the image
         required: true
-      # ghcr.io/bcgov/von-bc-registries-audit/audit:
-      #   description: 
-      #   required: true
-      # image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:
-      #   description:
-      #   required: true
+      github_image_name:
+        description:  github image name to be created
+        required: true
+      openshift_image_name:
+        description: openshift image name to be created
+        required: true 
     secrets:
       ROCKETCHAT_WEBHOOK:
         description: defining the rocket chat webhook url
@@ -61,16 +61,16 @@ runs:
       - name: Tag the image in the GHCR as ${{ inputs.environment }}
         shell: bash
         run: |
-          docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
-          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} ghcr.io/bcgov/von-bc-registries-audit/audit:${{ inputs.environment }}
-          docker push ghcr.io/bcgov/von-bc-registries-audit/audit:${{ inputs.environment }}
+          docker pull ${{ inputs.github_image_name }}@${{ inputs.image_digest }}
+          docker tag ${{ inputs.github_image_name }}@${{ inputs.image_digest }} ${{ inputs.github_image_name }}:${{ inputs.environment }}
+          docker push ${{ inputs.github_image_name }}:${{ inputs.environment }}
 
       - name: Tag the image in the OpenShift container registry as ${{ inputs.environment }}
         shell: bash
         run: |
-          docker pull ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }}
-          docker tag ghcr.io/bcgov/von-bc-registries-audit/audit@${{ inputs.image_digest }} image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:${{ inputs.environment }}
-          docker push image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit:${{ inputs.environment }}
+          docker pull ${{ inputs.github_image_name }}@${{ inputs.image_digest }}
+          docker tag ${{ inputs.github_image_name }}@${{ inputs.image_digest }} ${{ inputs.openshift_image_name }}:${{ inputs.environment }}
+          docker push ${{ inputs.openshift_image_name }}:${{ inputs.environment }}
 
       - name: Trigger Openshift
         shell: bash

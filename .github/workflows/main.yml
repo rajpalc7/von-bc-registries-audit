@@ -97,8 +97,8 @@ jobs:
           namespace: ca7f8f-dev
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ghcr.io/bcgov/von-bc-registries-audit/audit: ${{ xyz }}
-          image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit: ${{ xyz }}
+          github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
+          openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
           secrets: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
