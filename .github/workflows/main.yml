@@ -63,7 +63,6 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=ref,event=pr
           type=sha
-          type=latest
           type=${{ inputs.environment }}
 
     - name: Build and push Docker image
