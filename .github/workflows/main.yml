@@ -33,12 +33,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Define image tags
-      shell: bash
-      id: lowercase
-      run: |
-        TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
-        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+    # - name: Define image tags
+    #   shell: bash
+    #   id: lowercase
+    #   run: |
+    #     TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
+    #     echo "tags=${TAGS}" >> $GITHUB_OUTPUT
     # ToDo:
     #   - Add the Docker meta step back in for defining the tags and labels
     #   - Add additional tags.  `latest` for example.
@@ -52,6 +52,19 @@ jobs:
     #   tags: |
     #     <to be defined>
 # define as latest, SHA, dev . It should not be hard coded.
+
+    - name: Prepare docker tags for image
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/bcgov/von-bc-registries-audit/audit
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=ref,event=pr
+          type=sha
+          type=latest
+          type=${{ inputs.environment }}
 
     - name: Build and push Docker image
       id: docker_build
