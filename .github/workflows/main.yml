@@ -59,10 +59,10 @@ jobs:
       with:
         images: ghcr.io/bcgov/von-bc-registries-audit/audit
         tags: |
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=tag
           type=ref,event=pr
-          type=sha
           type=${{ inputs.environment }}
 
     - name: Build and push Docker image
