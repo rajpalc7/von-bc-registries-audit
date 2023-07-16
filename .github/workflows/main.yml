@@ -64,7 +64,6 @@ jobs:
           type=ref,event=tag
           type=ref,event=pr
           type=sha
-          type=latest
           type=dev
 
     - name: Build and push Docker image
