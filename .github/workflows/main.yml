@@ -59,7 +59,8 @@ jobs:
       with:
         images: ghcr.io/bcgov/von-bc-registries-audit/audit
         tags: |
-          user/image:latest
+          v1.0.0
+          latest
           type=schedule
           type=ref,event=branch
           type=ref,event=pr
