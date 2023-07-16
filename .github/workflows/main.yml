@@ -72,7 +72,7 @@ jobs:
         context: .
         file: docker/Dockerfile
         push: true
-        tags: ${{ steps.lowercase.outputs.tags }} # add additional tags
+        tags: ${{ steps.meta.outputs.tags }} # add additional tags
         labels: ${{ steps.meta.outputs.labels }}  # add Docker meta step back in
         cache-from: type=gha
         cache-to: type=gha,mode=max
