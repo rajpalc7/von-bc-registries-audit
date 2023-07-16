@@ -103,6 +103,7 @@ jobs:
 
       - name: deploy to dev
         uses: ./.github/workflows/actions/deploy
+        secrets: inherit
         with:
           environment: dev
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
