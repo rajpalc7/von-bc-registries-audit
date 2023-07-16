@@ -33,12 +33,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Define image tags
-      shell: bash
-      id: meta
-      run: |
-        TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
-        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+    # - name: Define image tags
+    #   shell: bash
+    #   id: lowercase
+    #   run: |
+    #     TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
+    #     echo "tags=${TAGS}" >> $GITHUB_OUTPUT
     # ToDo:
     #   - Add the Docker meta step back in for defining the tags and labels
     #   - Add additional tags.  `latest` for example.
@@ -63,7 +63,7 @@ jobs:
           type=ref,event=branch
           type=ref,event=tag
           type=ref,event=pr
-          type=${{ inputs.environment }}
+          type=sha
 
     - name: Build and push Docker image
       id: docker_build
