@@ -22,6 +22,7 @@ on:
       openshift_image_name:
         description: openshift image name to be created
         required: true 
+    secrets:
       rocketchat_webhook:
         description: defining the rocket chat webhook url
         required: true
