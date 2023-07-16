@@ -64,7 +64,6 @@ jobs:
           type=ref,event=tag
           type=ref,event=pr
           type=sha
-          type=dev
 
     - name: Build and push Docker image
       id: docker_build
@@ -78,11 +77,11 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    # - name: Display image results
-    #   id: meta
-    #   run: |
-    #     echo 'imageid=${{ steps.docker_build.outputs.imageid }}'
-    #     echo 'digest=${{ steps.docker_build.outputs.digest }}'
+    - name: Display image results
+      id: meta
+      run: |
+        echo 'imageid=${{ steps.docker_build.outputs.imageid }}'
+        echo 'digest=${{ steps.docker_build.outputs.digest }}'
 
   # ToDo:
   #   - Define these jobs as a reusable workflow, since the steps are identical.
