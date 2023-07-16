@@ -59,16 +59,16 @@ jobs:
       with:
         images: ghcr.io/bcgov/von-bc-registries-audit/audit
         tags: |
-          tag-custom: latest
-          type=schedule
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
-          type=sha,value=latest
-        flavor: |
-          latest=${{ matrix.flavor-latest }}
+          v1.0.0
+          latest
+          # tag-custom: latest
+          # type=schedule
+          # type=ref,event=branch
+          # type=ref,event=pr
+          # type=semver,pattern={{version}}
+          # type=semver,pattern={{major}}.{{minor}}
+          # type=semver,pattern={{major}}
+          # type=sha,value=latest
 
     - name: Build and push Docker image
       id: docker_build
