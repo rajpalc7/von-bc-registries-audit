@@ -61,7 +61,6 @@ jobs:
         flavor: |
           latest=true
         tags: |
-          tag-custom: latest
           type=schedule
           type=ref,event=branch
           type=ref,event=pr
