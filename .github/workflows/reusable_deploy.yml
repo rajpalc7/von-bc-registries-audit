@@ -29,9 +29,9 @@ on:
       ROCKETCHAT_TOKEN:
         description: defining the rocket chat token
         required: true
-      GITHUB_TOKEN:
-        description: secret token used to webhook github and rocketchat 
-        required: true
+      # GITHUB_TOKEN:
+        # description: secret token used to webhook github and rocketchat 
+        # required: true
       OPENSHIFT_TOKEN:
         description: openshift server token
         required: true
