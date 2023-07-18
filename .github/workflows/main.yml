@@ -115,7 +115,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
           openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
-        secrets: inherit
 
   deploy2test:
     needs: [build, deploy2dev]
@@ -133,7 +132,6 @@ jobs:
       - name: deploy to test
         uses: ./.github/workflows/actions/deploy
         with:
-          secrets: inherit
           environment: test
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
@@ -161,7 +159,6 @@ jobs:
       - name: deploy to prod
         uses: ./.github/workflows/actions/deploy
         with:
-          secrets: inherit
           environment: prod
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
