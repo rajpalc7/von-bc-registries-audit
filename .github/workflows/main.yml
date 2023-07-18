@@ -33,26 +33,6 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Define image tags
-    #   shell: bash
-    #   id: lowercase
-    #   run: |
-    #     TAGS=$( echo "ghcr.io/${{ github.repository }}/audit:latest" | tr '[:upper:]' '[:lower:]' )
-    #     echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-    # ToDo:
-    #   - Add the Docker meta step back in for defining the tags and labels
-    #   - Add additional tags.  `latest` for example.
-
-    # This is here as a starter, not as the actual implementation
-    # - name: Extract metadata (tags, labels) for Docker
-    #   id: meta
-    #   uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-    #   with:
-    #     images: ghcr.io/bcgov/von-bc-registries-audit/audit
-    #   tags: |
-    #     <to be defined>
-# define as latest, SHA, dev . It should not be hard coded.
-
     - name: Prepare docker tags for image
       id: meta
       uses: docker/metadata-action@v4
@@ -107,14 +87,19 @@ jobs:
         with:
           environment: dev
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          # OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-dev
-          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          rocketchat_token: ${{ inputs.rocketchat_token }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # ROCKETCHAT_WEBHOOK: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          # ROCKETCHAT_TOKEN: ${{ inputs.ROCKETCHAT_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
           openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
+        secrets: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ROCKETCHAT_WEBHOOK: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+          ROCKETCHAT_TOKEN: ${{ secrets.ROCKETCHAT_TOKEN }}
 
   deploy2test:
     needs: [build, deploy2dev]
@@ -135,11 +120,11 @@ jobs:
           environment: test
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-test
-          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ROCKETCHAT_WEBHOOK: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
           openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
 
@@ -162,11 +147,11 @@ jobs:
           environment: prod
           password: ${{ secrets.GITHUB_TOKEN }}
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
           image_digest: ${{ needs.build.outputs.image_digest }}
           namespace: ca7f8f-prod
-          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ROCKETCHAT_WEBHOOK: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
           openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
           

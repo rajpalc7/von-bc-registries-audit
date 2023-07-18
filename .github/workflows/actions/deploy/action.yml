@@ -23,16 +23,16 @@ on:
         description: openshift image name to be created
         required: true 
     secrets:
-      rocketchat_webhook:
+      ROCKETCHAT_WEBHOOK:
         description: defining the rocket chat webhook url
         required: true
-      rocketchat_token:
+      ROCKETCHAT_TOKEN:
         description: defining the rocket chat token
         required: true
-      github_token:
+      GITHUB_TOKEN:
         description: secret token used to webhook github and rocketchat 
         required: true
-      openshift_token:
+      OPENSHIFT_TOKEN:
         description: openshift server token
         required: true
 
@@ -44,14 +44,14 @@ runs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ inputs.github_token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Openshift CLI
         uses: redhat-actions/oc-login@v1
         with:
           environment: ${{ inputs.environment }}
           openshift_server_url: ${{ inputs.openshift_server_url }}
-          openshift_token: ${{ inputs.openshift_token }}
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
 
       - name: login in to OpenShift container registry
         shell: bash
@@ -87,6 +87,6 @@ runs:
           mention: 'here'
           mention_if: 'failure'
           channel: '#test-gha'
-          url: ${{ inputs.rocketchat_webhook }}
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
-          token: ${{ inputs.rocketchat_token }}
+          token: ${{ secrets.ROCKETCHAT_TOKEN }}
