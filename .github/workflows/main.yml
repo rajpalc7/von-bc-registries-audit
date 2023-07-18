@@ -104,14 +104,14 @@ jobs:
 
       - name: deploy to dev
         uses: ./.github/workflows/actions/deploy
-        secrets: inherit
+        with:
           environment: dev
-          # openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          # image_digest: ${{ needs.build.outputs.image_digest }}
-          # namespace: ca7f8f-dev
+          image_digest: ${{ needs.build.outputs.image_digest }}
+          namespace: ca7f8f-dev
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          # rocketchat_token: ${{ inputs.rocketchat_token }}
+          rocketchat_token: ${{ inputs.rocketchat_token }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
           openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
