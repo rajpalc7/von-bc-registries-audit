@@ -58,6 +58,8 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: ghcr.io/bcgov/von-bc-registries-audit/audit
+        flavor: |
+          latest=true
         tags: |
           tag-custom: latest
           type=schedule
