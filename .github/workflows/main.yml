@@ -78,7 +78,7 @@ jobs:
     permissions:
       packages: write
     runs-on: ubuntu-latest
-    environment: ${{ env.ENVIRONMENT }}
+    environment: dev
 
     steps:
       - name: Checkout
@@ -100,7 +100,7 @@ jobs:
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
 
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          rocketchat_token: ${{ secret.ROCKETCHAT_TOKEN }}
+          rocketchat_token: ${{ secrets.ROCKETCHAT_TOKEN }}
 
   deploy2test:
     needs: [build, deploy2dev]
