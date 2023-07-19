@@ -81,7 +81,7 @@ runs:
       shell: bash
       run: |
         echo starting rollout in ${{ inputs.namespace }}
-        oc -n ${{ inputs.namespace }} rollout status dc/${{ deployment_configuration }} --watch
+        oc -n ${{ inputs.namespace }} rollout status dc/${{ inputs.deployment_configuration }} --watch
 
     - name: Rocket.Chat Notification
       uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@v1.1.1
