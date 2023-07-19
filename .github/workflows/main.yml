@@ -1,14 +1,19 @@
 name: Build and Deploy Audit Image
 
-# ToDo:
-#   - Limit workflow runs to the main repo so it does not try to run on someone else's fork.
 on:
   workflow_dispatch:
-  pull_request: 
+  push:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  GITHUB_IMAGE_REPO: ghcr.io/bcgov/von-bc-registries-audit/
+  OPENSHIFT_IMAGE_REPO: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/
+  APP_NAME: audit
 
 jobs:
   build:
@@ -56,49 +61,45 @@ jobs:
         context: .
         file: docker/Dockerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }} # add additional tags
-        labels: ${{ steps.meta.outputs.labels }}  # add Docker meta step back in
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
     - name: Display image results
-      id: lowercase
       run: |
         echo 'imageid=${{ steps.docker_build.outputs.imageid }}'
         echo 'digest=${{ steps.docker_build.outputs.digest }}'
 
-  # ToDo:
-  #   - Define these jobs as a reusable workflow, since the steps are identical.
   deploy2dev:
     needs: build
+    env:
+      ENVIRONMENT: dev
     permissions:
       packages: write
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ env.ENVIRONMENT }}
 
-    # ToDo:
-    #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: deploy to dev
+      - name: Deploy to ${{ env.ENVIRONMENT }}
         uses: ./.github/workflows/actions/deploy
         with:
-          environment: dev
-          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
-          # openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          environment: ${{ env.ENVIRONMENT }}
+
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_image_name: ${{ env.GITHUB_IMAGE_REPO }}${{ env.APP_NAME }}
           image_digest: ${{ needs.build.outputs.image_digest }}
-          namespace: ca7f8f-dev
-          # rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          # rocketchat_token: ${{ inputs.rocketchat_token }}
-          # github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
-          openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
-        secrets: 
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          openshift_image_name: ${{ env.OPENSHIFT_IMAGE_REPO }}${{ env.APP_NAME }}
+
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          namespace: ${{ vars.NAMESPACE }}
+          deployment_configuration: ${{ env.APP_NAME }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           rocketchat_token: ${{ secret.ROCKETCHAT_TOKEN }}
 
   deploy2test:
@@ -107,7 +108,7 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     environment: test
-    
+
     # ToDo:
     #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
     steps:
@@ -134,7 +135,7 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     environment: prod
-        
+
     # ToDo:
     #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
     steps:
@@ -154,5 +155,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_image_name: ghcr.io/bcgov/von-bc-registries-audit/audit
           openshift_image_name: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/audit
-          
+
 
