@@ -96,7 +96,9 @@ jobs:
           namespace: ${{ vars.NAMESPACE }}
           deployment_configuration: ${{ env.APP_NAME }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          # rocketchat_token: ${{ secrets.ROCKETCHAT_TOKEN }}
 
   deploy2test:
     needs: [build, deploy2dev]
@@ -105,6 +107,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
 
+    # ToDo:
+    #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -130,6 +134,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
 
+    # ToDo:
+    #   - Define the 'environment' using an environment variable so it can also be used to define the tags.
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -147,3 +153,6 @@ jobs:
           deployment_configuration: ${{ env.APP_NAME }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
