@@ -1,92 +1,93 @@
 name: Deploy
 description: Deploy to OpenShift namespace
 
-on:
-  workflow_call:
-    inputs:
-      environment:
-        description: the environment to deploy to
-        required: true
-      openshift_server_url: 
-        description: openshift server url
-        required: true
-      image_digest:
-        description: openshift image digest
-        required: true
-      namespace:
-        description: namespace where we want to deploy the image
-        required: true
-      github_image_name:
-        description:  github image name to be created
-        required: true
-      openshift_image_name:
-        description: openshift image name to be created
-        required: true 
-    secrets:
-      ROCKETCHAT_WEBHOOK:
-        description: defining the rocket chat webhook url
-        required: true
-      ROCKETCHAT_TOKEN:
-        description: defining the rocket chat token
-        required: true
-      GITHUB_TOKEN:
-        description: secret token used to webhook github and rocketchat 
-        required: true
-      OPENSHIFT_TOKEN:
-        description: openshift server token
-        required: true
+inputs:
+  environment:
+    description: The environment to which the image will be deployed.
+    required: true
+
+  # Image parameters
+  ghcr_token:
+    description: The token to use to login to the GHCR.
+    required: true
+  github_image_name:
+    description: The name of the image in the GHCR to be deployed.
+    required: true
+  image_digest:
+    description: The digest of the image to be deployed.  Identifies the unique image tag in the GHCR.
+    required: true
+  openshift_image_name:
+    description: The name of the image to use when pushing to OpenShift.
+    required: true
+
+  # OpenShift parameters
+  openshift_server_url:
+    description: The URL of the OpenShift server.
+    required: true
+  namespace:
+    description: The OpenShift namespace where the image is to be deployed.
+    required: true
+  deployment_configuration:
+    description: The name of the OpenShift deployment configuration triggered by the new image.
+    required: true
+  openshift_token:
+    description: The token used to authenticate with the OpenShift server.
+    required: true
+
+  # rocket.chat notification parameters
+  rocketchat_webhook:
+    description: The URL to use for posting notifications to rocket.chat.
+    required: true
 
 runs:
-    using: composite
-    steps:
-      - name: Log in to the GHCR
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  using: composite
+  steps:
+    - name: Log in to the GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.ghcr_token }}
 
-      - name: Setup Openshift CLI
-        uses: redhat-actions/oc-login@v1
-        with:
-          environment: ${{ inputs.environment }}
-          openshift_server_url: ${{ inputs.openshift_server_url }}
-          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+    - name: Setup Openshift CLI
+      uses: redhat-actions/oc-login@v1
+      with:
+        openshift_server_url: ${{ inputs.openshift_server_url }}
+        openshift_token: ${{ inputs.openshift_token }}
 
-      - name: login in to OpenShift container registry
-        shell: bash
-        run: |
-          oc registry login
+    - name: login in to OpenShift container registry
+      shell: bash
+      run: |
+        oc registry login
 
-      - name: Tag the image in the GHCR as ${{ inputs.environment }}
-        shell: bash
-        run: |
-          docker pull ${{ inputs.github_image_name }}@${{ inputs.image_digest }}
-          docker tag ${{ inputs.github_image_name }}@${{ inputs.image_digest }} ${{ inputs.github_image_name }}:${{ inputs.environment }}
-          docker push ${{ inputs.github_image_name }}:${{ inputs.environment }}
+    - name: Tag the image in the GHCR as ${{ inputs.environment }}
+      shell: bash
+      run: |
+        docker pull ${{ inputs.github_image_name }}@${{ inputs.image_digest }}
+        docker tag ${{ inputs.github_image_name }}@${{ inputs.image_digest }} ${{ inputs.github_image_name }}:${{ inputs.environment }}
+        docker push ${{ inputs.github_image_name }}:${{ inputs.environment }}
 
-      - name: Tag the image in the OpenShift container registry as ${{ inputs.environment }}
-        shell: bash
-        run: |
-          docker pull ${{ inputs.github_image_name }}@${{ inputs.image_digest }}
-          docker tag ${{ inputs.github_image_name }}@${{ inputs.image_digest }} ${{ inputs.openshift_image_name }}:${{ inputs.environment }}
-          docker push ${{ inputs.openshift_image_name }}:${{ inputs.environment }}
+    - name: Tag the image in the OpenShift container registry as ${{ inputs.environment }}
+      shell: bash
+      run: |
+        docker pull ${{ inputs.github_image_name }}@${{ inputs.image_digest }}
+        docker tag ${{ inputs.github_image_name }}@${{ inputs.image_digest }} ${{ inputs.openshift_image_name }}:${{ inputs.environment }}
+        docker push ${{ inputs.openshift_image_name }}:${{ inputs.environment }}
 
-      - name: Trigger Openshift
-        shell: bash
-        run: |
-          echo starting rollout in ${{ inputs.namespace }}
-          oc -n ${{ inputs.namespace }} rollout status dc/audit --watch
+    - name: Trigger OpenShift rollout
+      shell: bash
+      run: |
+        echo starting rollout in ${{ inputs.namespace }}
+        oc -n ${{ inputs.namespace }} rollout status dc/${{ inputs.deployment_configuration }} --watch
 
-      - name: Rocket.Chat Notification
-        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
-        with:
-          type:  ${{ job.status }}
-          job_name: '*Deployment to ${{ inputs.environment }}*'
-          mention: 'here'
-          mention_if: 'failure'
-          channel: '#test-gha'
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          commit: true
-          token: ${{ secrets.ROCKETCHAT_TOKEN }}
+    - name: Rocket.Chat Notification
+      uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@1.1.1
+      if: always()
+      with:
+        type:  ${{ job.status }}
+        job_name: '*Deployment to ${{ inputs.environment }}*'
+        mention: 'here'
+        mention_if: 'failure'
+        channel: '#test-gha'
+        url: ${{ inputs.rocketchat_webhook }}
+        commit: true
