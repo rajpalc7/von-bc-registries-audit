@@ -38,9 +38,6 @@ inputs:
   rocketchat_webhook:
     description: The URL to use for posting notifications to rocket.chat.
     required: true
-  # rocketchat_token:
-  #   description: The token used to authenticate with rocket.chat.
-  #   required: true
 
 runs:
   using: composite
@@ -93,5 +90,4 @@ runs:
         mention_if: 'failure'
         channel: '#test-gha'
         url: ${{ inputs.rocketchat_webhook }}
-        # token: ${{ inputs.rocketchat_token }}
         commit: true
