@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    if: github.repository == 'bcgov/von-bc-regestries-audit' || github.event_name == 'workflow_dispatch'
+    if: (github.repository == 'bcgov/von-bc-registries-audit') || (github.event_name == 'workflow_dispatch')
     name: Build Image
     permissions:
       packages: write
@@ -97,7 +97,7 @@ jobs:
           deployment_configuration: ${{ env.APP_NAME }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-  
+
   deploy2test:
     needs: [build, deploy2dev]
     env:
