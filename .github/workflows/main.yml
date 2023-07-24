@@ -95,7 +95,7 @@ jobs:
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           namespace: ${{ vars.NAMESPACE }}
           deployment_configuration: ${{ env.APP_NAME }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN_TEST }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
   
   deploy2test:
@@ -122,7 +122,7 @@ jobs:
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           namespace: ${{ vars.NAMESPACE }}
           deployment_configuration: ${{ env.APP_NAME }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN_TEST }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
 
   deploy2prod:
@@ -149,6 +149,6 @@ jobs:
           openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
           namespace: ${{ vars.NAMESPACE }}
           deployment_configuration: ${{ env.APP_NAME }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN_TEST }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
 
