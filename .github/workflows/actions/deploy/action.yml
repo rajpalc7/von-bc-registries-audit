@@ -48,6 +48,7 @@ runs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ inputs.ghcr_token }}
+        configFile: ${{ github.workspace }}/.docker/config.json
 
     - name: Setup Openshift CLI
       uses: redhat-actions/oc-login@v1

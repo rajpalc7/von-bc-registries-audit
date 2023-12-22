@@ -1,0 +1,10 @@
+{
+  "auths": {
+    "ghcr.io": {
+      "username": "your-github-actor",
+      "password": "your-github-token",
+      "email": "your-email@example.com",
+      "auth": "base64-encoded-auth-string"
+    }
+  }
+}
