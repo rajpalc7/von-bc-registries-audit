@@ -1,0 +1,154 @@
+name: Build and Deploy Audit Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_IMAGE_REPO: ghcr.io/bcgov/von-bc-registries-audit/
+  OPENSHIFT_IMAGE_REPO: image-registry.apps.silver.devops.gov.bc.ca/ca7f8f-tools/
+  APP_NAME: audit
+
+jobs:
+  build:
+    if: (github.repository == 'bcgov/von-bc-registries-audit') || (github.event_name == 'workflow_dispatch')
+    name: Build Image
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    outputs:
+      image_digest: ${{steps.docker_build.outputs.digest}}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to the GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare docker tags for image
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/bcgov/von-bc-registries-audit/audit
+        flavor: |
+          latest=true
+        tags: |
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha,value=latest
+
+    - name: Build and push Docker image
+      id: docker_build
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        file: docker/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Display image results
+      run: |
+        echo 'imageid=${{ steps.docker_build.outputs.imageid }}'
+        echo 'digest=${{ steps.docker_build.outputs.digest }}'
+
+  deploy2dev:
+    needs: build
+    env:
+      ENVIRONMENT: dev
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy to ${{ env.ENVIRONMENT }}
+        uses: ./.github/workflows/actions/deploy
+        with:
+          environment: ${{ env.ENVIRONMENT }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_image_name: ${{ env.GITHUB_IMAGE_REPO }}${{ env.APP_NAME }}
+          image_digest: ${{ needs.build.outputs.image_digest }}
+          openshift_image_name: ${{ env.OPENSHIFT_IMAGE_REPO }}${{ env.APP_NAME }}
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          namespace: ${{ vars.NAMESPACE }}
+          deployment_configuration: ${{ env.APP_NAME }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+
+  deploy2test:
+    needs: [build, deploy2dev]
+    env:
+      ENVIRONMENT: test
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    environment: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: deploy to ${{ env.ENVIRONMENT }}
+        uses: ./.github/workflows/actions/deploy
+        with:
+          environment: ${{ env.ENVIRONMENT }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_image_name: ${{ env.GITHUB_IMAGE_REPO }}${{ env.APP_NAME }}
+          image_digest: ${{ needs.build.outputs.image_digest }}
+          openshift_image_name: ${{ env.OPENSHIFT_IMAGE_REPO }}${{ env.APP_NAME }}
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          namespace: ${{ vars.NAMESPACE }}
+          deployment_configuration: ${{ env.APP_NAME }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+
+  deploy2prod:
+    needs: [build, deploy2dev, deploy2test]
+    env:
+      ENVIRONMENT: prod
+    permissions:
+      packages: write
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: deploy to prod
+        uses: ./.github/workflows/actions/deploy
+        with:
+          environment: ${{ env.ENVIRONMENT }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_image_name: ${{ env.GITHUB_IMAGE_REPO }}${{ env.APP_NAME }}
+          image_digest: ${{ needs.build.outputs.image_digest }}
+          openshift_image_name: ${{ env.OPENSHIFT_IMAGE_REPO }}${{ env.APP_NAME }}
+          openshift_server_url: ${{ vars.OPENSHIFT_SERVER_URL }}
+          namespace: ${{ vars.NAMESPACE }}
+          deployment_configuration: ${{ env.APP_NAME }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          rocketchat_webhook: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+

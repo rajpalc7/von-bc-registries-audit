@@ -46,6 +46,12 @@ if createOperation; then
   readParameter "ORGBOOK_DB_USER - Please provide the database username:" ORGBOOK_DB_USER "" "false"
   readParameter "ORGBOOK_DB_PASSWORD - Please provide the password for the database:" ORGBOOK_DB_PASSWORD "" "false"
 
+  readParameter "ORGBOOK_WALLET_DB_HOST - Please provide the name of the database host:" ORGBOOK_WALLET_DB_HOST "" "false"
+  readParameter "ORGBOOK_WALLET_DB_PORT - Please provide the port number for the database:" ORGBOOK_WALLET_DB_PORT "" "false"
+  readParameter "ORGBOOK_WALLET_DB_DATABASE - Please provide the name of the database:" ORGBOOK_WALLET_DB_DATABASE "" "false"
+  readParameter "ORGBOOK_WALLET_DB_USER - Please provide the database username:" ORGBOOK_WALLET_DB_USER "" "false"
+  readParameter "ORGBOOK_WALLET_DB_PASSWORD - Please provide the password for the database:" ORGBOOK_WALLET_DB_PASSWORD "" "false"
+
   # Get the webhook URL
   readParameter "WEBHOOK_URL - Please provide the webhook endpoint URL.  If left blank, the webhook integration feature will be disabled:" WEBHOOK_URL "" "false"
 
@@ -78,6 +84,12 @@ else
   writeParameter "ORGBOOK_DB_DATABASE" "prompt_skipped" "false"
   writeParameter "ORGBOOK_DB_USER" "prompt_skipped" "false"
   writeParameter "ORGBOOK_DB_PASSWORD" "prompt_skipped" "false"
+
+  writeParameter "ORGBOOK_WALLET_DB_HOST" "prompt_skipped" "false"
+  writeParameter "ORGBOOK_WALLET_DB_PORT" "prompt_skipped" "false"
+  writeParameter "ORGBOOK_WALLET_DB_DATABASE" "prompt_skipped" "false"
+  writeParameter "ORGBOOK_WALLET_DB_USER" "prompt_skipped" "false"
+  writeParameter "ORGBOOK_WALLET_DB_PASSWORD" "prompt_skipped" "false"
 
   writeParameter "WEBHOOK_URL" "prompt_skipped" "false"
   writeParameter "FEEDBACK_TARGET_EMAIL" "prompt_skipped" "false"
