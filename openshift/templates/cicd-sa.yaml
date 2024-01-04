@@ -39,8 +39,12 @@ objects:
         resources:
           - imagestreamimages
         verbs:
+          - create
           - get
           - list
+          - patch
+          - update
+          - watch
       - apiGroups:
           - image.openshift.io
           - ""
@@ -50,15 +54,21 @@ objects:
           - create
           - get
           - list
+          - patch
           - update
+          - watch
       - apiGroups:
           - image.openshift.io
           - ""
         resources:
           - imagestreams
         verbs:
+          - create
           - get
           - list
+          - patch
+          - update
+          - watch
       - apiGroups:
           - build.openshift.io
           - ""
