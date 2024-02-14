@@ -26,13 +26,13 @@ jobs:
       image_digest: ${{steps.docker_build.outputs.digest}}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Log in to the GHCR
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -40,7 +40,7 @@ jobs:
 
     - name: Prepare docker tags for image
       id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v5
       with:
         images: ghcr.io/bcgov/von-bc-registries-audit/audit
         flavor: |
@@ -56,7 +56,7 @@ jobs:
 
     - name: Build and push Docker image
       id: docker_build
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         context: .
         file: docker/Dockerfile
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Deploy to ${{ env.ENVIRONMENT }}
         uses: ./.github/workflows/actions/deploy
@@ -109,7 +109,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: deploy to ${{ env.ENVIRONMENT }}
         uses: ./.github/workflows/actions/deploy
@@ -136,7 +136,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: deploy to prod
         uses: ./.github/workflows/actions/deploy
